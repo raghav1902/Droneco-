@@ -13,102 +13,6 @@ import logo from './assets/Droneco.jpg';
 import ReceptionistDashboard from './receptionist/ReceptionistDashboard';
 import AdminDashboard from './admin/AdminDashboard';
 
-// Shared Layout Header/Navbar
-const Navbar = () => {
-  const { isAuthenticated, user, logout } = useAuth();
-  const location = useLocation();
-  const [isDark, setIsDark] = useState(document.body.classList.contains('dark-theme'));
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-theme');
-      setIsDark(true);
-    } else {
-      document.body.classList.remove('dark-theme');
-      setIsDark(false);
-    }
-  }, []);
-
-  const handleToggleTheme = () => {
-    if (document.body.classList.contains('dark-theme')) {
-      document.body.classList.remove('dark-theme');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
-      document.body.classList.add('dark-theme');
-      localStorage.setItem('theme', 'dark');
-      setIsDark(true);
-    }
-  };
-
-  // Hide navbar on the student QR form landing page to prevent students from seeing staff portals
-  if (location.pathname === '/') {
-    return null;
-  }
-
-  return (
-    <nav className="navbar">
-      <div className="navbar-brand">
-        <img src={logo} alt="Droneco Logo" style={{ height: '32px', width: 'auto', borderRadius: '4px' }} />
-        <span>Droneco</span>
-      </div>
-      <div className="navbar-links">
-        <Link to="/" className="navbar-link">Student Form</Link>
-        {!isAuthenticated ? (
-          <Link to="/login" className="navbar-link">Staff Portal</Link>
-        ) : (
-          <>
-            {user.role === 'admin' ? (
-              <Link to="/admin" className="navbar-link">Admin Panel</Link>
-            ) : (
-              <Link to="/receptionist" className="navbar-link">Counselor Desk</Link>
-            )}
-            <button
-              onClick={logout}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                fontWeight: 500,
-                transition: 'var(--transition-fast)'
-              }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--text-primary)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--text-muted)'}
-            >
-              Sign Out
-            </button>
-          </>
-        )}
-        <button
-          onClick={handleToggleTheme}
-          style={{
-            background: 'var(--bg-tertiary)',
-            border: '1px solid var(--border)',
-            fontSize: '1.15rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0.4rem',
-            borderRadius: '50%',
-            transition: 'var(--transition)',
-            marginLeft: '0.5rem',
-            outline: 'none',
-            width: '36px',
-            height: '36px'
-          }}
-          title="Toggle dark/light theme"
-        >
-          {isDark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </div>
-    </nav>
-  );
-};
-
 // Protected Route Wrapper
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -138,8 +42,7 @@ const App = () => {
     <AuthProvider>
       <Router>
         <div className="app-container">
-          <Navbar />
-          <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Routes>
               {/* Public Student Wizard Form */}
               <Route path="/" element={<StudentForm />} />

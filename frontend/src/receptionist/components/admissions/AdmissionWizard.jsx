@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../utils/toast.js';
-
+import API from '../../../api/api.js';
 import { 
   CheckCircle, User, FileText, UploadCloud, 
-  CreditCard, ShieldCheck, ChevronRight, ChevronLeft, Printer, Home
+  CreditCard, ShieldCheck, ChevronRight, ChevronLeft, Printer, Home, X, Check, Image as ImageIcon, File, Eye
 } from 'lucide-react';
 
 const steps = [
@@ -19,30 +19,59 @@ const steps = [
 const AdmissionWizard = ({ lead, courses, onComplete, onCancel }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
+    // Step 1: Lead Info
     studentName: lead?.full_name || '',
-    fatherName: '',
+    fatherName: lead?.guardian_name || '',
     motherName: '',
-    phone: lead?.phone || '',
+    phone: lead?.mobile_number || lead?.phone || '',
     email: lead?.email || '',
     address: lead?.city || '',
     courseSelected: lead?.interested_course_id || '',
+    inquiryDate: lead?.created_at ? new Date(lead.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+    
+    // Step 2: Student Details
     dob: '',
     gender: '',
     bloodGroup: '',
-    emergencyContact: '',
+    emergencyContact: lead?.guardian_phone || '',
     qualification: '',
     occupation: '',
     joiningDate: new Date().toISOString().split('T')[0],
     batch: '',
     section: '',
     remarks: '',
+
+    // Step 3: Documents (Mock)
+    photo: null,
+    aadhaar: null,
+    marksheet: null,
+    signature: null,
+    
+    // Step 5: Fee
     paymentMethod: 'Cash',
     amountCollected: ''
   });
 
   const [studentId, setStudentId] = useState('');
+  const [admissionNo, setAdmissionNo] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 6));
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      if (!formData.studentName || !formData.phone || !formData.courseSelected) {
+        showToast('Please fill all mandatory fields (Name, Course, Phone)', 'error');
+        return;
+      }
+    }
+    if (currentStep === 2) {
+      if (!formData.dob || !formData.gender || !formData.bloodGroup || !formData.emergencyContact || !formData.batch) {
+        showToast('Please fill all mandatory student details', 'error');
+        return;
+      }
+    }
+    setCurrentStep(prev => Math.min(prev + 1, 6));
+  };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const handleChange = (e) => {
@@ -55,65 +84,106 @@ const AdmissionWizard = ({ lead, courses, onComplete, onCancel }) => {
     const year = new Date().getFullYear();
     const random = Math.floor(1000 + Math.random() * 9000);
     setStudentId(`${prefix}${year}${random}`);
-    nextStep();
+    setAdmissionNo(`ADM-${year}-${random}`);
+    setAdmissionNo(`ADM-${year}-${random}`);
   };
 
   const getCourseName = (id) => {
-    const course = courses.find(c => c.id === id);
+    const course = courses.find(c => c.id === id || c.id === Number(id));
     return course ? course.course_name : 'Selected Course';
+  };
+
+  const handleFileUpload = (e, docType) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Mock upload progress
+      setUploadProgress(prev => ({ ...prev, [docType]: 10 }));
+      const interval = setInterval(() => {
+        setUploadProgress(prev => {
+          const current = prev[docType] || 10;
+          if (current >= 100) {
+            clearInterval(interval);
+            setFormData(prevData => ({
+              ...prevData,
+              [docType]: { name: file.name, size: (file.size / 1024).toFixed(1) + ' KB', type: file.type }
+            }));
+            setTimeout(() => setUploadProgress(p => ({ ...p, [docType]: 0 })), 500);
+            return { ...prev, [docType]: 100 };
+          }
+          return { ...prev, [docType]: current + 20 };
+        });
+      }, 150);
+    }
+  };
+
+  const handleFinalSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      // Call API to mark lead as Enrolled.
+      // Assuming a patch endpoint for status exists:
+      await API.patch(`/leads/${lead.id}/status`, { status: 'Enrolled' });
+      // In a real app, we would also hit a POST /students endpoint here
+      // For this mockup, we just complete and notify
+      handleNextStep();
+    } catch (err) {
+      console.error('Enrollment failed', err);
+      alert('Failed to process enrollment. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = () => {
     switch(currentStep) {
       case 1:
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="wizard-step">
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Verify Lead Information</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <div className="form-group">
+          <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="p-2">
+            <h3 className="text-xl font-semibold mb-6 text-foreground">Verify Lead Information</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="form-group mb-0">
                 <label className="form-label">Student Name</label>
-                <input type="text" className="form-input" name="studentName" value={formData.studentName} onChange={handleChange} />
+                <input type="text" className="form-input bg-muted" name="studentName" value={formData.studentName} onChange={handleChange} />
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Course Selected</label>
-                <select className="form-select" name="courseSelected" value={formData.courseSelected} onChange={handleChange}>
+                <select className="form-select bg-muted" name="courseSelected" value={formData.courseSelected} onChange={handleChange}>
                   <option value="">Select Course</option>
                   {courses.map(c => <option key={c.id} value={c.id}>{c.course_name}</option>)}
                 </select>
               </div>
-              <div className="form-group">
-                <label className="form-label">Phone</label>
-                <input type="text" className="form-input" name="phone" value={formData.phone} onChange={handleChange} />
+              <div className="form-group mb-0">
+                <label className="form-label">Phone Number</label>
+                <input type="text" className="form-input bg-muted" name="phone" value={formData.phone} onChange={handleChange} />
               </div>
-              <div className="form-group">
-                <label className="form-label">Email</label>
-                <input type="email" className="form-input" name="email" value={formData.email} onChange={handleChange} />
+              <div className="form-group mb-0">
+                <label className="form-label">Email Address</label>
+                <input type="email" className="form-input bg-muted" name="email" value={formData.email} onChange={handleChange} />
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Father's Name</label>
                 <input type="text" className="form-input" name="fatherName" value={formData.fatherName} onChange={handleChange} />
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Mother's Name</label>
                 <input type="text" className="form-input" name="motherName" value={formData.motherName} onChange={handleChange} />
               </div>
-              <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                <label className="form-label">Address</label>
-                <textarea className="form-input" name="address" value={formData.address} onChange={handleChange} rows={2} />
+              <div className="form-group mb-0 col-span-2">
+                <label className="form-label">Address / City</label>
+                <textarea className="form-textarea w-full p-3 border border-border rounded-md bg-surface text-foreground" rows="2" name="address" value={formData.address} onChange={handleChange}></textarea>
               </div>
             </div>
           </motion.div>
         );
       case 2:
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="wizard-step">
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Additional Student Details</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
-              <div className="form-group">
+          <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="p-2">
+            <h3 className="text-xl font-semibold mb-6 text-foreground">Student Details</h3>
+            <div className="grid grid-cols-3 gap-6">
+              <div className="form-group mb-0">
                 <label className="form-label">Date of Birth</label>
                 <input type="date" className="form-input" name="dob" value={formData.dob} onChange={handleChange} />
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Gender</label>
                 <select className="form-select" name="gender" value={formData.gender} onChange={handleChange}>
                   <option value="">Select</option>
@@ -122,195 +192,237 @@ const AdmissionWizard = ({ lead, courses, onComplete, onCancel }) => {
                   <option value="Other">Other</option>
                 </select>
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Blood Group</label>
-                <input type="text" className="form-input" name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} placeholder="e.g. O+" />
+                <select className="form-select" name="bloodGroup" value={formData.bloodGroup} onChange={handleChange}>
+                  <option value="">Select</option>
+                  <option value="A+">A+</option><option value="A-">A-</option>
+                  <option value="B+">B+</option><option value="B-">B-</option>
+                  <option value="O+">O+</option><option value="O-">O-</option>
+                  <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                </select>
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Emergency Contact</label>
                 <input type="text" className="form-input" name="emergencyContact" value={formData.emergencyContact} onChange={handleChange} />
               </div>
-              <div className="form-group">
-                <label className="form-label">Highest Qualification</label>
-                <input type="text" className="form-input" name="qualification" value={formData.qualification} onChange={handleChange} />
+              <div className="form-group mb-0">
+                <label className="form-label">Qualification</label>
+                <input type="text" className="form-input" name="qualification" value={formData.qualification} onChange={handleChange} placeholder="e.g. B.Tech" />
               </div>
-              <div className="form-group">
-                <label className="form-label">Occupation (if any)</label>
-                <input type="text" className="form-input" name="occupation" value={formData.occupation} onChange={handleChange} />
+              <div className="form-group mb-0">
+                <label className="form-label">Occupation</label>
+                <input type="text" className="form-input" name="occupation" value={formData.occupation} onChange={handleChange} placeholder="e.g. Student" />
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Joining Date</label>
                 <input type="date" className="form-input" name="joiningDate" value={formData.joiningDate} onChange={handleChange} />
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Batch Assigned</label>
                 <select className="form-select" name="batch" value={formData.batch} onChange={handleChange}>
                   <option value="">Select Batch</option>
                   <option value="Morning">Morning (9 AM - 12 PM)</option>
                   <option value="Evening">Evening (4 PM - 7 PM)</option>
-                  <option value="Weekend">Weekend Special</option>
+                  <option value="Weekend">Weekend</option>
                 </select>
               </div>
-              <div className="form-group">
+              <div className="form-group mb-0">
                 <label className="form-label">Section</label>
                 <input type="text" className="form-input" name="section" value={formData.section} onChange={handleChange} placeholder="e.g. A" />
               </div>
-              <div className="form-group" style={{ gridColumn: 'span 3' }}>
-                <label className="form-label">Admission Remarks</label>
-                <textarea className="form-input" name="remarks" value={formData.remarks} onChange={handleChange} rows={2} />
+              <div className="form-group mb-0 col-span-3">
+                <label className="form-label">Remarks / Special Notes</label>
+                <textarea className="form-textarea w-full p-3 border border-border rounded-md bg-surface text-foreground" rows="2" name="remarks" value={formData.remarks} onChange={handleChange}></textarea>
               </div>
             </div>
           </motion.div>
         );
       case 3:
+        const docs = [
+          { key: 'photo', label: 'Student Photo (Passport Size)', icon: ImageIcon },
+          { key: 'aadhaar', label: 'Aadhaar Card (Front & Back)', icon: File },
+          { key: 'marksheet', label: 'Previous Marksheet', icon: FileText },
+          { key: 'signature', label: 'Student Signature', icon: ImageIcon },
+        ];
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="wizard-step">
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Upload Documents</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-              <div className="upload-box glass-card" style={{ padding: '2rem', textAlign: 'center', borderStyle: 'dashed' }}>
-                <UploadCloud size={40} style={{ margin: '0 auto 1rem', color: 'var(--accent)' }} />
-                <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Student Photo</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Drag & drop or click to upload</p>
-                <button className="btn btn-secondary btn-sm" onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>Select File</button>
-              </div>
-              <div className="upload-box glass-card" style={{ padding: '2rem', textAlign: 'center', borderStyle: 'dashed' }}>
-                <UploadCloud size={40} style={{ margin: '0 auto 1rem', color: 'var(--accent)' }} />
-                <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Aadhaar Card / ID Proof</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Front and back PDF or Image</p>
-                <button className="btn btn-secondary btn-sm" onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>Select File</button>
-              </div>
-              <div className="upload-box glass-card" style={{ padding: '2rem', textAlign: 'center', borderStyle: 'dashed' }}>
-                <UploadCloud size={40} style={{ margin: '0 auto 1rem', color: 'var(--accent)' }} />
-                <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Previous Marksheet</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Optional, up to 5MB</p>
-                <button className="btn btn-secondary btn-sm" onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>Select File</button>
-              </div>
-              <div className="upload-box glass-card" style={{ padding: '2rem', textAlign: 'center', borderStyle: 'dashed' }}>
-                <UploadCloud size={40} style={{ margin: '0 auto 1rem', color: 'var(--accent)' }} />
-                <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Digital Signature</h4>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Scan of student signature</p>
-                <button className="btn btn-secondary btn-sm" onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>Select File</button>
-              </div>
+          <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="p-2">
+            <h3 className="text-xl font-semibold mb-6 text-foreground">Upload Documents</h3>
+            <div className="grid grid-cols-2 gap-6">
+              {docs.map(doc => (
+                <div key={doc.key} className="border border-border border-dashed rounded-lg p-6 bg-surface flex flex-col items-center justify-center relative hover:border-primary transition-colors group">
+                  {!formData[doc.key] ? (
+                    <>
+                      <doc.icon className="w-10 h-10 text-muted-foreground mb-3 group-hover:text-primary transition-colors" />
+                      <p className="text-sm font-medium text-foreground mb-1">{doc.label}</p>
+                      <p className="text-xs text-muted-foreground mb-4">Drag & drop or click to upload</p>
+                      <label className="btn btn-secondary text-xs px-4 py-1.5 cursor-pointer">
+                        Browse File
+                        <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, doc.key)} />
+                      </label>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center w-full">
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+                        <Check className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground mb-1 truncate w-full text-center">{formData[doc.key].name}</p>
+                      <p className="text-xs text-muted-foreground">{formData[doc.key].size}</p>
+                      <button onClick={() => setFormData(prev => ({...prev, [doc.key]: null}))} className="text-xs text-destructive hover:underline mt-2">Remove</button>
+                    </div>
+                  )}
+                  {uploadProgress[doc.key] > 0 && uploadProgress[doc.key] < 100 && (
+                    <div className="absolute bottom-0 left-0 h-1 bg-primary transition-all duration-200" style={{ width: `${uploadProgress[doc.key]}%` }}></div>
+                  )}
+                </div>
+              ))}
             </div>
           </motion.div>
         );
       case 4:
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="wizard-step">
-            <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-              <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--bg-tertiary)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
-                <ShieldCheck size={40} />
-              </div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem' }}>Generate Student ID</h3>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem', maxWidth: '400px', margin: '0 auto 2rem' }}>
-                All documents are verified. Click the button below to auto-generate a unique system ID and admission number.
-              </p>
+          <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="p-2 flex flex-col items-center justify-center min-h-[400px]">
+            <div className="text-center max-w-md w-full">
+              <ShieldCheck className="w-16 h-16 text-primary mx-auto mb-6" />
+              <h3 className="text-2xl font-semibold mb-2 text-foreground">Generate Student ID</h3>
+              <p className="text-muted-foreground mb-8">Generate a unique institutional identity card number and admission record for {formData.studentName}.</p>
               
               {!studentId ? (
-                <button className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }} onClick={handleGenerateId}>
-                  Generate Unique ID
+                <button onClick={handleGenerateId} className="btn btn-primary w-full py-3 text-lg font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+                  <Zap className="w-5 h-5" /> Generate Identity
                 </button>
               ) : (
-                <div className="glass-card animate-fade-in" style={{ display: 'inline-block', padding: '2rem', border: '2px solid var(--accent)' }}>
-                  <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Student ID</p>
-                  <h2 style={{ fontSize: '2.5rem', fontWeight: 700, margin: '0.5rem 0', color: 'var(--accent)' }}>{studentId}</h2>
-                  <div style={{ width: '200px', height: '40px', background: 'var(--text-main)', margin: '1rem auto', opacity: 0.1, borderRadius: '4px' }}></div>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Barcode Placeholder</p>
+                <div className="animate-fade-in">
+                  <div className="bg-card border border-border rounded-xl p-6 shadow-sm mb-6 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+                    <p className="text-sm text-muted-foreground uppercase tracking-widest font-semibold mb-1">Student ID</p>
+                    <h2 className="text-4xl font-bold tracking-tight text-foreground mb-4">{studentId}</h2>
+                    <div className="flex justify-between items-center pt-4 border-t border-border">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Admission No.</p>
+                        <p className="font-medium text-foreground">{admissionNo}</p>
+                      </div>
+                      <div className="w-16 h-16 bg-muted rounded flex items-center justify-center opacity-50">
+                        {/* Fake QR */}
+                        <div className="grid grid-cols-3 gap-1 w-8 h-8">
+                          {[...Array(9)].map((_, i) => <div key={i} className={`bg-foreground rounded-sm ${Math.random() > 0.5 ? 'opacity-100' : 'opacity-20'}`}></div>)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={handleNextStep} className="btn btn-primary w-full py-3">Continue to Payment</button>
                 </div>
               )}
             </div>
           </motion.div>
         );
       case 5:
+        // Mock Fee calculation
+        const admissionFee = 2500;
+        const courseFee = 45000;
+        const discount = formData.courseSelected ? 5000 : 0;
+        const tax = (courseFee - discount) * 0.18;
+        const total = admissionFee + courseFee - discount + tax;
+
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="wizard-step">
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>Fee Confirmation & First Payment</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '2rem' }}>
-              <div className="glass-card" style={{ padding: '1.5rem' }}>
-                <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-muted)' }}>Fee Breakdown</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--border)' }}>
-                  <span>Course Fee ({getCourseName(formData.courseSelected)})</span>
-                  <span style={{ fontWeight: 600 }}>₹45,000</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--border)' }}>
-                  <span>Admission Fee</span>
-                  <span style={{ fontWeight: 600 }}>₹2,500</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--border)' }}>
-                  <span>Special Discount</span>
-                  <span style={{ fontWeight: 600, color: 'var(--success)' }}>-₹5,000</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--border)' }}>
-                  <span>Tax (18% GST)</span>
-                  <span style={{ fontWeight: 600 }}>₹7,650</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0', marginTop: '0.5rem' }}>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 600 }}>Total Payable</span>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent)' }}>₹50,150</span>
+          <motion.div key="step5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="p-2">
+            <h3 className="text-xl font-semibold mb-6 text-foreground">Fee Confirmation</h3>
+            <div className="grid grid-cols-5 gap-8">
+              <div className="col-span-3">
+                <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden mb-6">
+                  <div className="bg-muted px-6 py-4 border-b border-border flex justify-between items-center">
+                    <h4 className="font-semibold text-foreground">Invoice Summary</h4>
+                    <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-full uppercase tracking-wider">Draft</span>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex justify-between py-3 border-b border-border/50">
+                      <span className="text-muted-foreground">Admission Fee</span>
+                      <span className="font-medium text-foreground">₹{admissionFee.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between py-3 border-b border-border/50">
+                      <span className="text-muted-foreground">Course Fee ({getCourseName(formData.courseSelected)})</span>
+                      <span className="font-medium text-foreground">₹{courseFee.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between py-3 border-b border-border/50">
+                      <span className="text-muted-foreground">Special Discount</span>
+                      <span className="font-medium text-emerald-600">-₹{discount.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between py-3 border-b border-border/50">
+                      <span className="text-muted-foreground">GST (18%)</span>
+                      <span className="font-medium text-foreground">₹{tax.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between py-4 mt-2">
+                      <span className="text-lg font-bold text-foreground">Total Payable</span>
+                      <span className="text-xl font-bold text-primary">₹{total.toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="glass-card" style={{ padding: '1.5rem', background: 'var(--bg-tertiary)' }}>
-                <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>Collect Initial Payment</h4>
-                <div className="form-group">
-                  <label className="form-label">Amount to Collect Today</label>
-                  <input type="number" className="form-input" name="amountCollected" value={formData.amountCollected} onChange={handleChange} placeholder="₹" />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Payment Method</label>
-                  <select className="form-select" name="paymentMethod" value={formData.paymentMethod} onChange={handleChange}>
-                    <option value="Cash">Cash</option>
-                    <option value="UPI">UPI</option>
-                    <option value="Card">Credit/Debit Card</option>
-                    <option value="Bank Transfer">Bank Transfer</option>
-                    <option value="Cheque">Cheque</option>
-                  </select>
-                </div>
-                {formData.paymentMethod !== 'Cash' && (
+              <div className="col-span-2">
+                <div className="bg-card border border-border rounded-lg shadow-sm p-6 mb-6">
+                  <h4 className="font-semibold text-foreground mb-4">Payment Collection</h4>
                   <div className="form-group">
-                    <label className="form-label">Transaction ID / Reference</label>
-                    <input type="text" className="form-input" placeholder="Enter ref no." />
+                    <label className="form-label">Amount to Collect Today</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₹</span>
+                      <input type="number" className="form-input pl-8 text-lg font-semibold" value={formData.amountCollected} onChange={(e) => setFormData({...formData, amountCollected: e.target.value})} placeholder="0.00" />
+                    </div>
                   </div>
-                )}
-                <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Remaining Balance</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 600 }}>₹{Math.max(0, 50150 - (Number(formData.amountCollected) || 0)).toLocaleString()}</div>
+                  <div className="form-group mb-0">
+                    <label className="form-label">Payment Mode</label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {['Cash', 'UPI', 'Card', 'Bank Transfer'].map(mode => (
+                        <div 
+                          key={mode} 
+                          onClick={() => setFormData({...formData, paymentMethod: mode})}
+                          className={`p-3 border rounded-md text-center cursor-pointer transition-all text-sm font-medium
+                            ${formData.paymentMethod === mode ? 'border-primary bg-primary/5 text-primary' : 'border-border bg-surface text-muted-foreground hover:border-primary/50'}`}
+                        >
+                          {mode}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
+                <button onClick={handleFinalSubmit} disabled={isSubmitting} className="btn btn-primary w-full py-4 text-lg shadow-md flex items-center justify-center gap-2">
+                  {isSubmitting ? <span className="spinner w-5 h-5 border-2"></span> : <><CheckCircle className="w-5 h-5" /> Confirm Admission</>}
+                </button>
               </div>
             </div>
           </motion.div>
         );
       case 6:
         return (
-          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="wizard-step" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
-            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--success)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', boxShadow: '0 0 30px rgba(16, 185, 129, 0.3)' }}>
-              <CheckCircle size={40} />
+          <motion.div key="step6" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center min-h-[500px] text-center p-6">
+            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-emerald-100/50">
+              <CheckCircle className="w-10 h-10" />
             </div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Enrollment Successful!</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1rem' }}>{formData.studentName} has been officially enrolled in {getCourseName(formData.courseSelected)}.</p>
+            <h2 className="text-3xl font-bold text-foreground mb-2">Enrollment Successful!</h2>
+            <p className="text-muted-foreground mb-8 text-lg">Student {formData.studentName} has been admitted and added to the roster.</p>
             
-            <div className="glass-card" style={{ display: 'inline-flex', gap: '3rem', padding: '1.5rem 3rem', marginBottom: '3rem', textAlign: 'left' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Student ID</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)' }}>{studentId}</div>
+            <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full mb-8 text-left shadow-sm">
+              <div className="flex justify-between items-center py-2 border-b border-border/50">
+                <span className="text-muted-foreground">Student ID</span>
+                <span className="font-semibold text-foreground">{studentId}</span>
               </div>
-              <div style={{ borderLeft: '1px solid var(--border)' }}></div>
-              <div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Amount Paid</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--success)' }}>₹{formData.amountCollected || 0}</div>
+              <div className="flex justify-between items-center py-2 border-b border-border/50">
+                <span className="text-muted-foreground">Course</span>
+                <span className="font-semibold text-foreground">{getCourseName(formData.courseSelected)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-border/50">
+                <span className="text-muted-foreground">Fee Collected</span>
+                <span className="font-semibold text-emerald-600">₹{Number(formData.amountCollected || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-muted-foreground">Status</span>
+                <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full uppercase">Enrolled</span>
               </div>
             </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-              <button className="btn btn-secondary" style={{ padding: '0.75rem 1.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>
-                <Printer size={18} /> Print Receipt
-              </button>
-              <button className="btn btn-secondary" style={{ padding: '0.75rem 1.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>
-                <Printer size={18} /> Print ID Card
-              </button>
-              <button className="btn btn-primary" style={{ padding: '0.75rem 1.5rem' }} onClick={onComplete}>
-                <Home size={18} /> Go to Dashboard
-              </button>
+
+            <div className="flex flex-wrap justify-center gap-4">
+              <button className="btn btn-secondary flex items-center gap-2"><Printer className="w-4 h-4" /> Print Receipt</button>
+              <button className="btn btn-secondary flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Print ID Card</button>
+              <button onClick={onComplete} className="btn btn-primary flex items-center gap-2"><Home className="w-4 h-4" /> Return to Dashboard</button>
             </div>
           </motion.div>
         );
@@ -320,79 +432,91 @@ const AdmissionWizard = ({ lead, courses, onComplete, onCancel }) => {
   };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--bg-app)', zIndex: 2000, display: 'flex', flexDirection: 'column' }}>
-      {/* Header / Stepper Progress */}
-      <header style={{ padding: '1.5rem 3rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>New Admission</h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Lead Ref: {lead?.id || 'NEW'}</p>
+    <div className="fixed inset-0 z-[100] bg-background flex flex-col overflow-hidden animate-fade-in">
+      {/* Header */}
+      <div className="h-16 border-b border-border bg-card flex items-center justify-between px-6 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold">D</div>
+          <span className="font-semibold text-lg text-foreground tracking-tight">Admission Wizard</span>
         </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          {steps.map((step, index) => {
-            const isCompleted = currentStep > step.id;
-            const isCurrent = currentStep === step.id;
-            const Icon = step.icon;
-            
-            return (
-              <React.Fragment key={step.id}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isCurrent || isCompleted ? 1 : 0.4 }}>
-                  <div style={{ 
-                    width: '32px', height: '32px', borderRadius: '50%', 
-                    background: isCompleted ? 'var(--success)' : isCurrent ? 'var(--accent)' : 'var(--bg-tertiary)',
-                    color: isCompleted || isCurrent ? '#fff' : 'var(--text-secondary)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    {isCompleted ? <CheckCircle size={16} /> : <Icon size={16} />}
-                  </div>
-                  <span style={{ fontSize: '0.9rem', fontWeight: isCurrent ? 600 : 500, color: isCurrent ? 'var(--text-main)' : 'var(--text-secondary)' }}>
+        {currentStep < 6 && (
+          <button onClick={onCancel} className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-full hover:bg-muted">
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Stepper */}
+      <div className="bg-card border-b border-border px-8 py-6 shrink-0">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between relative">
+            {/* Progress Line */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted rounded-full overflow-hidden z-0">
+              <motion.div 
+                className="h-full bg-primary"
+                initial={{ width: '0%' }}
+                animate={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+              />
+            </div>
+
+            {steps.map((step, idx) => {
+              const isActive = step.id === currentStep;
+              const isCompleted = step.id < currentStep;
+              const Icon = step.icon;
+
+              return (
+                <div key={step.id} className="relative z-10 flex flex-col items-center gap-2">
+                  <motion.div 
+                    initial={false}
+                    animate={{ 
+                      backgroundColor: isActive || isCompleted ? 'hsl(var(--primary))' : 'hsl(var(--card))',
+                      borderColor: isActive || isCompleted ? 'hsl(var(--primary))' : 'hsl(var(--border))',
+                      color: isActive || isCompleted ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+                      scale: isActive ? 1.1 : 1
+                    }}
+                    className={`w-10 h-10 rounded-full border-2 flex items-center justify-center shadow-sm transition-colors duration-300`}
+                  >
+                    {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-4 h-4" />}
+                  </motion.div>
+                  <span className={`text-xs font-semibold uppercase tracking-wider absolute -bottom-6 w-32 text-center left-1/2 -translate-x-1/2 transition-colors duration-300 ${isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {step.title}
                   </span>
                 </div>
-                {index < steps.length - 1 && (
-                  <div style={{ width: '40px', height: '2px', background: isCompleted ? 'var(--success)' : 'var(--border)' }}></div>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-        
-        <button className="btn btn-secondary" onClick={onCancel} style={{ border: 'none', background: 'var(--bg-tertiary)' }}>Cancel</button>
-      </header>
-
-      {/* Main Content Area */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: '3rem', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
-        <div style={{ width: '100%', maxWidth: currentStep === 5 ? '1000px' : '850px' }}>
-          <AnimatePresence mode="wait">
-            {renderStepContent()}
-          </AnimatePresence>
-        </div>
-      </main>
-
-      {/* Footer Navigation */}
-      {currentStep < 6 && (
-        <footer style={{ padding: '1.5rem 3rem', borderTop: '1px solid var(--border)', background: 'var(--bg-surface)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <button 
-            className="btn btn-secondary" 
-            onClick={prevStep} 
-            disabled={currentStep === 1}
-            style={{ opacity: currentStep === 1 ? 0 : 1 }}
-          >
-            <ChevronLeft size={18} /> Back
-          </button>
-          
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <button className="btn btn-secondary" onClick={onCancel}>Save Draft</button>
-            {currentStep === 4 && !studentId ? (
-              <button className="btn btn-primary" onClick={handleGenerateId} disabled>Next Step <ChevronRight size={18} /></button>
-            ) : currentStep === 5 ? (
-              <button className="btn btn-primary" style={{ background: 'var(--success)' }} onClick={nextStep}>Confirm Admission <CheckCircle size={18} className="ml-2" style={{ marginLeft: '0.5rem' }} /></button>
-            ) : (
-              <button className="btn btn-primary" onClick={nextStep}>Next Step <ChevronRight size={18} /></button>
-            )}
+              );
+            })}
           </div>
-        </footer>
-      )}
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto bg-background p-8">
+        <div className="max-w-4xl mx-auto bg-card border border-border rounded-xl shadow-sm min-h-[500px] flex flex-col relative">
+          <div className="flex-1 p-6 overflow-x-hidden">
+            <AnimatePresence mode="wait">
+              {renderStepContent()}
+            </AnimatePresence>
+          </div>
+          
+          {/* Footer Controls */}
+          {currentStep < 6 && (
+            <div className="border-t border-border p-6 bg-muted/30 flex justify-between rounded-b-xl shrink-0 mt-auto">
+              <button 
+                onClick={prevStep} 
+                disabled={currentStep === 1}
+                className={`btn btn-secondary flex items-center gap-2 ${currentStep === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <ChevronLeft className="w-4 h-4" /> Back
+              </button>
+              {currentStep < 5 && (
+                <button onClick={handleNextStep} className="btn btn-primary flex items-center gap-2">
+                  Next Step <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

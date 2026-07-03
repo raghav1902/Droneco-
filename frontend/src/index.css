@@ -1,68 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Shadcn UI variables */
+    --background: 210 20% 98%; /* f7f9fa */
+    --foreground: 215 28% 17%; /* text-main */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 215 28% 17%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
+    --popover-foreground: 215 28% 17%;
+    --primary: 175 75% 26%; /* Teal 700 */
+    --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-foreground: 215 28% 17%;
+    --muted: 214 32% 91%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 175 75% 26%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 348 83% 47%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 175 75% 26%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    /* Legacy / Dashboard specific variables */
+    --bg-app: #f7f9fa; /* Very light subtle gray */
+    --bg-surface: #ffffff; 
+    --bg-tertiary: #f1f5f9; 
+    --bg-primary: #ffffff;
+    
+    --text-main: #1f2937; 
+    --text-secondary: #4b5563; 
+    --text-muted: #6b7280; 
+    --font-display: 'Playfair Display', serif;
+    
+    /* The Old Theme Teal Color from Screenshot */
+    --accent-hex: #0f766e; 
+    --accent-light: #ccfbf1; 
+    --accent-glow: rgba(15, 118, 110, 0.15); 
+    
+    --accent-primary: #0f766e;
+    --accent-secondary: #0d9488;
+    
+    --danger: #e11d48; 
+    --danger-glow: rgba(244, 63, 94, 0.1); 
+    --warning: #d97706; 
+    --success: #059669; 
+    --success-glow: rgba(5, 150, 105, 0.1);
+    
+    --border-color: #e5e7eb;
+    --radius-sm: 6px; 
+    --radius: 8px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); 
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --transition: all 0.2s ease-in-out;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
+  .dark, [data-theme="dark"], .dark-theme {
+    /* Shadcn UI variables */
+    --background: 0 0% 11%;
+    --foreground: 0 0% 97%;
+    --card: 0 0% 14%;
+    --card-foreground: 0 0% 97%;
+    --popover: 0 0% 14%;
+    --popover-foreground: 0 0% 97%;
+    --primary: 173 80% 40%; /* Teal 500 */
+    --primary-foreground: 0 0% 11%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 97%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 215 14% 65%;
+    --accent: 173 80% 40%;
+    --accent-foreground: 0 0% 11%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
+    --border: 0 0% 23%;
+    --input: 0 0% 23%;
+    --ring: 173 80% 40%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Dark Mode uses the same teal accent */
+    --bg-app: #1c1c1c;        /* Main dark background */
+    --bg-surface: #242424;    /* Cards background */
+    --bg-tertiary: #2e2e2e;   /* Subtle table headers/nested boxes */
+    --bg-primary: #1c1c1c;
+    
+    --text-main: #f8fafc; 
+    --text-secondary: #cbd5e1; 
+    --text-muted: #94a3b8; 
+    
+    --accent-hex: #14b8a6; /* Brighter teal for dark mode */
+    --accent-light: rgba(20, 184, 166, 0.15); 
+    --accent-glow: rgba(20, 184, 166, 0.15); 
+    
+    --accent-primary: #14b8a6;
+    --accent-secondary: #0f766e;
+    
+    --danger: #f87171; 
+    --danger-glow: rgba(248, 113, 113, 0.15); 
+    --warning: #fbbf24; 
+    --success: #34d399; 
+    --success-glow: rgba(52, 211, 153, 0.15);
+    
+    --border-color: #3f3f46;  /* Subtle grey border */
+    
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2); 
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -71,9 +122,168 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+  }
+  /* Heading font override for Student form */
+  h1, .serif-heading {
+    font-family: 'Playfair Display', serif;
   }
 }
-:root { --bg-app: #f8fafc; --bg-surface: #ffffff; --bg-tertiary: #f1f5f9; --text-main: #1e293b; --text-secondary: #475569; --text-muted: #64748b; --accent: #0f766e; --accent-light: #f0fdfa; --accent-glow: rgba(15, 118, 110, 0.1); --danger: #ef4444; --danger-glow: rgba(239, 68, 68, 0.1); --warning: #f59e0b; --success: #10b981; --border: #e2e8f0; --radius: 12px; --radius-sm: 6px; --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04); } .btn { padding: 0.5rem 1rem; border-radius: var(--radius-sm); border: 1px solid transparent; cursor: pointer; transition: all 0.2s; font-weight: 500; display: inline-flex; justify-content: center; align-items: center; } .btn-primary { background: var(--accent); color: white; } .btn-secondary { background: white; border-color: var(--border); color: var(--text-main); } .form-input, .form-select, .form-textarea { width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: white; color: var(--text-main); font-size: 0.9rem; transition: border-color 0.2s; } .form-label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.4rem; }
 
+@layer components {
+  .glass-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Buttons */
+  .btn { 
+    padding: 0.5rem 1rem; 
+    border-radius: var(--radius-sm); 
+    border: 1px solid transparent; 
+    cursor: pointer; 
+    transition: all 0.2s; 
+    font-weight: 500; 
+    display: inline-flex; 
+    justify-content: center; 
+    align-items: center; 
+  } 
+  .btn-primary { 
+    background: var(--accent-hex); 
+    color: #ffffff; 
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    filter: brightness(1.1);
+  }
+  .btn-secondary { 
+    background: transparent; 
+    border-color: var(--border-color); 
+    color: var(--text-main); 
+  }
+  .btn-secondary:hover {
+    background: var(--bg-tertiary);
+  }
+  
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  
+  /* Form Inputs (Search bar and dropdowns) */
+  .form-input, .form-select, .form-textarea, input[type="text"], input[type="search"], select, input[type="number"], input[type="email"], input[type="date"] { 
+    width: 100%; 
+    padding: 0.6rem 1rem; 
+    border: 1px solid var(--border-color); 
+    border-radius: var(--radius-sm); 
+    background: var(--bg-surface); 
+    color: var(--text-main); 
+    font-size: 0.9rem; 
+    transition: all 0.2s ease-in-out; 
+    height: 2.75rem; /* Consistent height */
+  } 
+  .form-textarea {
+    height: auto;
+  }
+  
+  /* Shadow in light mode, glow in dark mode */
+  :root .form-input, :root .form-select, :root .form-textarea, :root input[type="text"], :root input[type="search"], :root select, :root input[type="number"], :root input[type="email"], :root input[type="date"] {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus, input[type="text"]:focus, input[type="search"]:focus, select:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="date"]:focus {
+    outline: none;
+    border-color: var(--accent-hex);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+  
+  .form-label { 
+    display: block; 
+    font-size: 0.75rem; 
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600; 
+    color: var(--text-secondary); 
+    margin-bottom: 0.4rem; 
+  }
+
+  /* Status Badges */
+  .badge-new {
+    background: rgba(59, 130, 246, 0.1); color: #1d4ed8; font-weight: 600; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; display: inline-flex; align-items: center; text-transform: uppercase;
+  }
+  .badge-contacted {
+    background: rgba(245, 158, 11, 0.1); color: #b45309; font-weight: 600; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; display: inline-flex; align-items: center; text-transform: uppercase;
+  }
+  .badge-interested {
+    background: rgba(249, 115, 22, 0.1); color: #c2410c; font-weight: 600; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; display: inline-flex; align-items: center; text-transform: uppercase;
+  }
+  .badge-not-interested {
+    background: rgba(244, 63, 94, 0.1); color: #e11d48; font-weight: 600; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; display: inline-flex; align-items: center; text-transform: uppercase;
+  }
+  .badge-enrolled {
+    background: rgba(16, 185, 129, 0.1); color: #047857; font-weight: 600; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; display: inline-flex; align-items: center; text-transform: uppercase;
+  }
+  
+  .dark .badge-new { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+  .dark .badge-contacted { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+  .dark .badge-interested { background: rgba(249, 115, 22, 0.2); color: #fdba74; }
+  .dark .badge-not-interested { background: rgba(244, 63, 94, 0.2); color: #fda4af; }
+  .dark .badge-enrolled { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+
+  /* Table Customizations */
+  tbody tr {
+    transition: background-color 0.2s;
+    border-bottom: 1px solid var(--border-color);
+  }
+  tbody tr:hover {
+    background: var(--bg-tertiary);
+  }
+  tbody tr:last-child {
+    border-bottom: 0;
+  }
+  th {
+    font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 1rem; text-align: left;
+    color: var(--text-secondary);
+  }
+  td {
+    padding: 1rem; font-size: 0.875rem;
+  }
+
+  /* Wizard Layout for Student Form */
+  .wizard-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-surface);
+  }
+  .intro-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4rem 10%;
+    background-color: var(--bg-app);
+    border-right: 1px solid var(--border-color);
+  }
+  .form-panel {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem;
+    background-color: var(--bg-surface);
+  }
+  
+  @media (max-width: 768px) {
+    .wizard-layout {
+      flex-direction: column;
+    }
+    .intro-panel, .form-panel {
+      padding: 2rem 1.5rem;
+    }
+  }
+}

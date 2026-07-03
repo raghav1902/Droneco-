@@ -22,7 +22,7 @@ import AppLayout from '../layouts/AppLayout';
 
 const ReceptionistDashboard = () => {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('registry'); // registry, dashboard, search, collect, receipt, dues, history
+  const [activeTab, setActiveTab] = useState('leads'); // leads, dashboard, search, collect, receipt, dues, history
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Cross-component state
@@ -144,7 +144,7 @@ const ReceptionistDashboard = () => {
   return (
     <AppLayout role="receptionist" activeTab={activeTab} setActiveTab={setActiveTab}>
       <div className="w-full">
-        {activeTab === 'registry' && (
+        {activeTab === 'leads' && (
           <StudentLeads 
             leads={leads}
             loading={loading}
@@ -167,7 +167,11 @@ const ReceptionistDashboard = () => {
         {activeTab === 'students' && (
           selectedStudentProfile ? 
             <StudentProfile student={selectedStudentProfile} onBack={() => setSelectedStudentProfile(null)} /> : 
-            <StudentsList onViewProfile={setSelectedStudentProfile} onCollectFee={(student) => { setSelectedFeeStudent(student); setActiveTab('collection'); }} />
+            <StudentsList 
+              onViewProfile={setSelectedStudentProfile} 
+              onCollectFee={(student) => { setSelectedFeeStudent(student); setActiveTab('collection'); }} 
+              onEnrollNew={() => { setSelectedLeadForAdmission(null); setActiveTab('admissions'); }}
+            />
         )}
         {activeTab === 'collection' && <CollectFee student={selectedFeeStudent} onPaymentSuccess={(tab) => { if (tab) setActiveTab(tab); else { setActiveTab('students'); setSelectedFeeStudent(null); } }} />}
         {activeTab === 'receipt' && <ReceiptPage />}
@@ -178,8 +182,8 @@ const ReceptionistDashboard = () => {
           <AdmissionWizard 
             lead={selectedLeadForAdmission} 
             courses={courses} 
-            onComplete={() => setActiveTab('students')}
-            onCancel={() => { setSelectedLeadForAdmission(null); setActiveTab('registry'); }}
+            onComplete={() => { setActiveTab('students'); setSelectedLeadForAdmission(null); fetchData(); }}
+            onCancel={() => { setSelectedLeadForAdmission(null); setActiveTab('leads'); }}
           />
         )}
       </div>
@@ -220,7 +224,7 @@ const ReceptionistDashboard = () => {
                     <div><label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Email</label><span>{selectedLead.email || 'N/A'}</span></div>
                     <div><label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Phone</label><span>{selectedLead.mobile_number || 'N/A'}</span></div>
                     <div><label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>City</label><span>{selectedLead.city}</span></div>
-                    <div><label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Course Interest</label><span style={{ color: 'var(--accent)', fontWeight: 600 }}>{getCourseName(selectedLead.interested_course_id)}</span></div>
+                    <div><label style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Course Interest</label><span style={{ color: 'var(--accent-hex)', fontWeight: 600 }}>{getCourseName(selectedLead.interested_course_id)}</span></div>
                   </div>
 
                   {selectedLead.filler_type === 'guardian' && (
@@ -294,7 +298,7 @@ const ReceptionistDashboard = () => {
                     </div>
 
                     <button type="submit" className="btn btn-primary" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} disabled={modalSubmitting}>
-                      {modalSubmitting ? 'Saving...' : <><Save size={18} /> Save Remarks</>}
+                      {modalSubmitting ? 'Saving...' : <>Save Remarks ✓</>}
                     </button>
                   </form>
                   <h4 style={{ fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: 600 }}>Follow-up history</h4>
