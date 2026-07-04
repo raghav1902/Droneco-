@@ -1,18 +1,18 @@
 import React from 'react';
 import { Eye, Edit, UserPlus, CheckCircle } from 'lucide-react';
 
-const StudentLeads = ({ 
-  leads, 
-  loading, 
-  search, 
-  setSearch, 
-  statusFilter, 
-  setStatusFilter, 
-  courseFilter, 
-  setCourseFilter, 
-  assignmentFilter, 
-  setAssignmentFilter, 
-  courses, 
+const StudentLeads = ({
+  leads,
+  loading,
+  search,
+  setSearch,
+  statusFilter,
+  setStatusFilter,
+  courseFilter,
+  setCourseFilter,
+  assignmentFilter,
+  setAssignmentFilter,
+  courses,
   onViewLead,
   onEnrollLead
 }) => {
@@ -90,19 +90,18 @@ const StudentLeads = ({
                 <tr key={lead.id} className="table-row-hover">
                   <td>{new Date(lead.created_at || new Date()).toLocaleDateString()}</td>
                   <td>
-                    <div style={{ fontWeight: 600 }}>{lead.student_name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{lead.phone}</div>
+                    <div style={{ fontWeight: 600 }}>{lead.full_name}</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{ }</div>
                   </td>
                   <td>{getCourseName(lead.course_id)}</td>
                   <td>{lead.city || 'N/A'}</td>
                   <td>
-                    <span className={`status-badge ${
-                      lead.status === 'Enrolled' ? 'status-success' : 
-                      lead.status === 'Approved' ? 'status-success' : 
-                      lead.status === 'Interested' ? 'status-info' : 
-                      lead.status === 'Not Interested' ? 'status-error' : 
-                      'status-warning'
-                    }`}>
+                    <span className={`status-badge ${lead.status === 'Enrolled' ? 'status-success' :
+                        lead.status === 'Approved' ? 'status-success' :
+                          lead.status === 'Interested' ? 'status-info' :
+                            lead.status === 'Not Interested' ? 'status-error' :
+                              'status-warning'
+                      }`}>
                       {lead.status}
                     </span>
                   </td>

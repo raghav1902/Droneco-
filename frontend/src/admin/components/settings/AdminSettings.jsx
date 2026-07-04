@@ -334,7 +334,7 @@ const About = () => (
   <div className="animate-fade-in">
     <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>About System</h3>
     <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-      <div style={{ display: 'inline-flex', padding: '1rem', borderRadius: '50%', background: 'var(--accent-glow)', color: 'var(--accent)', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'inline-flex', padding: '1rem', borderRadius: '50%', background: 'var(--accent-glow)', color: 'var(--accent-hex)', marginBottom: '1.5rem' }}>
         <Building2 size={48} />
       </div>
       <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Institute Management System</h2>
@@ -403,7 +403,7 @@ const AdminSettings = () => {
                   justifyContent: 'flex-start', 
                   padding: '0.75rem 1rem', 
                   borderColor: 'transparent',
-                  background: activeSection === item.id ? 'var(--accent)' : 'transparent',
+                  background: activeSection === item.id ? 'var(--accent-hex)' : 'transparent',
                   color: activeSection === item.id ? '#fff' : 'var(--text-main)',
                   boxShadow: 'none'
                 }}

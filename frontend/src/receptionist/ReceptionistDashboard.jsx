@@ -99,7 +99,7 @@ const ReceptionistDashboard = () => {
 
   const handleEnrollLead = (lead) => {
     setSelectedLeadForAdmission(lead);
-    setActiveTab('admissions');
+    setActiveTab('admission-wizard');
   };
 
   // Submit new feedback / remark
@@ -169,16 +169,16 @@ const ReceptionistDashboard = () => {
             <StudentProfile student={selectedStudentProfile} onBack={() => setSelectedStudentProfile(null)} /> : 
             <StudentsList 
               onViewProfile={setSelectedStudentProfile} 
-              onCollectFee={(student) => { setSelectedFeeStudent(student); setActiveTab('collection'); }} 
-              onEnrollNew={() => { setSelectedLeadForAdmission(null); setActiveTab('admissions'); }}
+              onCollectFee={(student) => { setSelectedFeeStudent(student); setActiveTab('collect-fee'); }} 
+              onEnrollNew={() => { setSelectedLeadForAdmission(null); setActiveTab('admission-wizard'); }}
             />
         )}
-        {activeTab === 'collection' && <CollectFee student={selectedFeeStudent} onPaymentSuccess={(tab) => { if (tab) setActiveTab(tab); else { setActiveTab('students'); setSelectedFeeStudent(null); } }} />}
+        {activeTab === 'collect-fee' && <CollectFee student={selectedFeeStudent} onPaymentSuccess={(tab) => { if (tab) setActiveTab(tab); else { setActiveTab('students'); setSelectedFeeStudent(null); } }} />}
         {activeTab === 'receipt' && <ReceiptPage />}
-        {activeTab === 'dues' && <DueList />}
-        {activeTab === 'history' && <PaymentHistory />}
+        {activeTab === 'due-list' && <DueList />}
+        {activeTab === 'payment-history' && <PaymentHistory />}
         {activeTab === 'settings' && <ReceptionSettings />}
-        {activeTab === 'admissions' && (
+        {activeTab === 'admission-wizard' && (
           <AdmissionWizard 
             lead={selectedLeadForAdmission} 
             courses={courses} 
@@ -274,16 +274,27 @@ const ReceptionistDashboard = () => {
                   <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '1.25rem', letterSpacing: '0.05em' }}>CRM Actions</h3>
 
                   {/* Status */}
-                  <div className="form-group">
+                  <div className="form-group" style={{ marginBottom: '1rem' }}>
                     <label className="form-label">Pipeline Status</label>
                     <select className="form-select" value={updatingStatus} onChange={(e) => handleStatusUpdate(e.target.value)}>
                       <option value="New">New</option>
                       <option value="Contacted">Contacted</option>
                       <option value="Interested">Interested</option>
                       <option value="Not Interested">Not Interested</option>
+                      <option value="Approved">Approved</option>
                       <option value="Enrolled">Enrolled</option>
                     </select>
                   </div>
+                  <button 
+                    className="btn btn-secondary" 
+                    style={{ width: '100%', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--accent-hex)', borderColor: 'var(--accent-hex)' }}
+                    onClick={() => {
+                      handleEnrollLead(selectedLead);
+                      handleCloseModal();
+                    }}
+                  >
+                    <UserPlus size={16} /> Start Admission Wizard
+                  </button>
 
                   {/* Add Feedback */}
                   <form onSubmit={handleAddFeedback} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>

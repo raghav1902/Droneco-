@@ -51,8 +51,8 @@ const Reports = () => {
               <AreaChart data={mockDailyCollection}>
                 <defs>
                   <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="var(--accent-hex)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="var(--accent-hex)" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -62,7 +62,7 @@ const Reports = () => {
                   contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', color: 'var(--text-main)' }} 
                   itemStyle={{ color: 'var(--text-main)' }} 
                 />
-                <Area type="monotone" dataKey="amount" stroke="var(--accent)" fillOpacity={1} fill="url(#colorAmount)" />
+                <Area type="monotone" dataKey="amount" stroke="var(--accent-hex)" fillOpacity={1} fill="url(#colorAmount)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

@@ -4,47 +4,94 @@ import { useAuth } from '../../../context/AuthContext';
 import { showToast } from '../../../utils/toast.js';
 
 
-const ProfileSettings = ({ user }) => (
-  <div className="animate-fade-in">
-    <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Profile Settings</h3>
-    <div className="glass-card" style={{ padding: '2rem' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', maxWidth: '500px' }}>
-        
-        <div className="form-group">
-          <label className="form-label">Profile Picture</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '80px', height: '80px', background: 'var(--bg-tertiary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>No Image</span>
-            </div>
-            <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>
-              <Upload size={16} /> Choose Image
-            </button>
-          </div>
-        </div>
+const ProfileSettings = () => {
+  const { user, updateUser } = useAuth();
+  const [name, setName] = useState(user?.name || "");
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [profilePhoto, setProfilePhoto] = useState(user?.profile_photo || "");
+  const [loading, setLoading] = useState(false);
 
-        <div className="form-group">
-          <label className="form-label">Full Name</label>
-          <input type="text" className="form-input" defaultValue={user?.name || "Receptionist User"} />
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePhoto(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { default: API } = await import('../../../api/api');
+      const response = await API.put('/auth/profile', {
+        name,
+        phone,
+        profile_photo: profilePhoto
+      });
+      if (response.data.success) {
+        updateUser(response.data.data);
+        showToast('Profile updated successfully!', 'success');
+      } else {
+        showToast(response.data.message || 'Update failed', 'error');
+      }
+    } catch (error) {
+      showToast('Error updating profile', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Profile Settings</h3>
+      <div className="glass-card" style={{ padding: '2rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', maxWidth: '500px' }}>
+          
+          <div className="form-group">
+            <label className="form-label">Profile Picture</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ width: '80px', height: '80px', background: 'var(--bg-tertiary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>No Image</span>
+                )}
+              </div>
+              <label className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <Upload size={16} /> Choose Image
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageChange} />
+              </label>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Full Name</label>
+            <input type="text" className="form-input" value={name} onChange={e => setName(e.target.value)} />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Email Address</label>
+            <input type="email" className="form-input" value={user?.email || ""} disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Contact admin to change email address.</p>
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Phone Number</label>
+            <input type="text" className="form-input" value={phone} onChange={e => setPhone(e.target.value)} />
+          </div>
+          
         </div>
-        
-        <div className="form-group">
-          <label className="form-label">Email Address</label>
-          <input type="email" className="form-input" defaultValue={user?.email || "reception@institute.edu"} disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Contact admin to change email address.</p>
-        </div>
-        
-        <div className="form-group">
-          <label className="form-label">Phone Number</label>
-          <input type="text" className="form-input" defaultValue="+1 987-654-3210" />
-        </div>
-        
+        <button className="btn btn-primary" style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={handleUpdate} disabled={loading}>
+          <Save size={16} /> {loading ? 'Updating...' : 'Update Profile'}
+        </button>
       </div>
-      <button className="btn btn-primary" style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>
-        <Save size={16} /> Update Profile
-      </button>
     </div>
-  </div>
-);
+  );
+};
 
 const AccountSettings = () => (
   <div className="animate-fade-in">
@@ -103,7 +150,7 @@ const ReceptionSettings = () => {
                     justifyContent: 'flex-start', 
                     padding: '0.75rem 1rem', 
                     borderColor: 'transparent',
-                    background: activeSection === item.id ? 'var(--accent)' : 'transparent',
+                    background: activeSection === item.id ? 'var(--accent-hex)' : 'transparent',
                     color: activeSection === item.id ? '#fff' : 'var(--text-main)',
                     boxShadow: 'none'
                   }}

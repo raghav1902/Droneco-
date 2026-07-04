@@ -71,6 +71,11 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = () => user && user.role === 'admin';
   const isReceptionist = () => user && user.role === 'receptionist';
 
+  const updateUser = (newUserData) => {
+    setUser(newUserData);
+    localStorage.setItem('user', JSON.stringify(newUserData));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -78,6 +83,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
+        updateUser,
         isAdmin,
         isReceptionist,
         isAuthenticated: !!user

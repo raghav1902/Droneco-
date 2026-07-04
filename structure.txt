@@ -1,0 +1,200 @@
+.
++--- .gitignore
++--- backend
+|   +--- app.js
+|   +--- config
+|   |   \--- README.md
+|   +--- constants
+|   |   \--- README.md
+|   +--- controllers
+|   |   +--- Admin
+|   |   |   +--- README.md
+|   |   |   \--- statsController.js
+|   |   +--- Auth
+|   |   |   +--- authController.js
+|   |   |   \--- README.md
+|   |   +--- Lead
+|   |   |   +--- courseController.js
+|   |   |   +--- leadController.js
+|   |   |   +--- questionController.js
+|   |   |   \--- README.md
+|   |   \--- Receptionist
+|   |       \--- README.md
+|   +--- database
+|   |   +--- README.md
+|   |   \--- store.js
+|   +--- docs
+|   |   \--- database_er_diagram.md
+|   +--- logs
+|   |   \--- README.md
+|   +--- middleware
+|   |   +--- authentication
+|   |   |   +--- authMiddleware.js
+|   |   |   \--- README.md
+|   |   +--- authorization
+|   |   |   +--- README.md
+|   |   |   \--- roleMiddleware.js
+|   |   +--- errorHandler
+|   |   |   +--- errorHandler.js
+|   |   |   \--- README.md
+|   |   \--- logger
+|   |       \--- README.md
+|   +--- models
+|   |   +--- Course
+|   |   |   \--- README.md
+|   |   +--- Fee
+|   |   |   \--- README.md
+|   |   +--- Lead
+|   |   |   \--- README.md
+|   |   +--- Payment
+|   |   |   \--- README.md
+|   |   +--- Role
+|   |   |   \--- README.md
+|   |   \--- User
+|   |       \--- README.md
+|   +--- package-lock.json
+|   +--- package.json
+|   +--- routes
+|   |   +--- admin
+|   |   |   \--- README.md
+|   |   +--- admin.js
+|   |   +--- auth
+|   |   |   \--- README.md
+|   |   +--- auth.js
+|   |   +--- courses.js
+|   |   +--- lead
+|   |   |   \--- README.md
+|   |   +--- leads.js
+|   |   +--- questions.js
+|   |   \--- receptionist
+|   |       \--- README.md
+|   +--- services
+|   |   +--- admin
+|   |   |   \--- README.md
+|   |   +--- auth
+|   |   |   \--- README.md
+|   |   +--- fee
+|   |   |   \--- README.md
+|   |   +--- lead
+|   |   |   \--- README.md
+|   |   +--- payment
+|   |   |   \--- README.md
+|   |   \--- user
+|   |       \--- README.md
+|   +--- utils
+|   |   \--- README.md
+|   \--- validators
+|       \--- README.md
++--- frontend
+|   +--- components.json
+|   +--- index.html
+|   +--- jsconfig.json
+|   +--- package-lock.json
+|   +--- package.json
+|   +--- postcss.config.js
+|   +--- public
+|   +--- README.md
+|   +--- src
+|   |   +--- admin
+|   |   |   +--- AdminDashboard.jsx
+|   |   |   +--- components
+|   |   |   |   +--- DiscountManagement.jsx
+|   |   |   |   +--- FeeDashboard.jsx
+|   |   |   |   +--- FeeRules.jsx
+|   |   |   |   +--- FeeStructure.jsx
+|   |   |   |   +--- Reports.jsx
+|   |   |   |   \--- settings
+|   |   |   |       \--- AdminSettings.jsx
+|   |   |   \--- README.md
+|   |   +--- api
+|   |   |   +--- api.js
+|   |   |   \--- README.md
+|   |   +--- App.jsx
+|   |   +--- assets
+|   |   |   +--- Droneco.jpg
+|   |   |   \--- DroneCo_Logo-copy.png
+|   |   +--- components
+|   |   |   +--- README.md
+|   |   |   \--- ui
+|   |   |       +--- badge.jsx
+|   |   |       +--- button.jsx
+|   |   |       +--- card.jsx
+|   |   |       +--- dialog.jsx
+|   |   |       +--- dropdown-menu.jsx
+|   |   |       +--- input.jsx
+|   |   |       +--- select.jsx
+|   |   |       +--- table.jsx
+|   |   |       +--- tabs.jsx
+|   |   |       +--- toast.jsx
+|   |   |       \--- toaster.jsx
+|   |   +--- constants
+|   |   |   \--- README.md
+|   |   +--- context
+|   |   |   +--- AuthContext.jsx
+|   |   |   \--- README.md
+|   |   +--- forms
+|   |   |   +--- README.md
+|   |   |   +--- Review
+|   |   |   |   \--- index.jsx
+|   |   |   +--- Step1
+|   |   |   |   \--- index.jsx
+|   |   |   +--- Step2
+|   |   |   |   \--- index.jsx
+|   |   |   +--- Step3
+|   |   |   |   \--- index.jsx
+|   |   |   +--- StudentForm.jsx
+|   |   |   \--- Success
+|   |   |       \--- index.jsx
+|   |   +--- hooks
+|   |   |   +--- README.md
+|   |   |   \--- use-toast.js
+|   |   +--- index.css
+|   |   +--- layouts
+|   |   |   +--- AppLayout.jsx
+|   |   |   +--- PageHeader.jsx
+|   |   |   +--- README.md
+|   |   |   \--- Sidebar.jsx
+|   |   +--- lib
+|   |   |   \--- utils.js
+|   |   +--- main.jsx
+|   |   +--- pages
+|   |   |   +--- admin
+|   |   |   +--- auth
+|   |   |   |   \--- Login.jsx
+|   |   |   +--- form
+|   |   |   +--- README.md
+|   |   |   \--- receptionist
+|   |   +--- receptionist
+|   |   |   +--- components
+|   |   |   |   +--- admissions
+|   |   |   |   |   \--- AdmissionWizard.jsx
+|   |   |   |   +--- CollectFee.jsx
+|   |   |   |   +--- DueList.jsx
+|   |   |   |   +--- PaymentHistory.jsx
+|   |   |   |   +--- ReceiptPage.jsx
+|   |   |   |   +--- ReceptionDashboard.jsx
+|   |   |   |   +--- settings
+|   |   |   |   |   \--- ReceptionSettings.jsx
+|   |   |   |   +--- StudentLeads.jsx
+|   |   |   |   +--- students
+|   |   |   |   |   +--- StudentProfile.jsx
+|   |   |   |   |   \--- StudentsList.jsx
+|   |   |   |   \--- StudentSearch.jsx
+|   |   |   +--- README.md
+|   |   |   \--- ReceptionistDashboard.jsx
+|   |   +--- routes
+|   |   |   \--- README.md
+|   |   +--- services
+|   |   |   \--- README.md
+|   |   +--- styles
+|   |   |   \--- README.md
+|   |   +--- utils
+|   |   |   +--- README.md
+|   |   |   \--- toast.js
+|   |   \--- validations
+|   |       \--- README.md
+|   +--- tailwind.config.js
+|   \--- vite.config.js
++--- gen_structure.js
++--- README.md
+\--- system_architecture_design.md

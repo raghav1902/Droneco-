@@ -4,7 +4,7 @@ import { showToast } from '../../../utils/toast.js';
 import API from '../../../api/api.js';
 import { 
   CheckCircle, User, FileText, UploadCloud, 
-  CreditCard, ShieldCheck, ChevronRight, ChevronLeft, Printer, Home, X, Check, Image as ImageIcon, File, Eye
+  CreditCard, ShieldCheck, ChevronRight, ChevronLeft, Printer, Home, X, Check, Image as ImageIcon, File, Eye, Zap
 } from 'lucide-react';
 
 const steps = [
@@ -119,9 +119,11 @@ const AdmissionWizard = ({ lead, courses, onComplete, onCancel }) => {
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Call API to mark lead as Enrolled.
-      // Assuming a patch endpoint for status exists:
-      await API.patch(`/leads/${lead.id}/status`, { status: 'Enrolled' });
+      // Call API to mark lead as Enrolled if lead exists
+      if (lead && lead.id) {
+        // Assuming a patch endpoint for status exists:
+        await API.patch(`/leads/${lead.id}/status`, { status: 'Enrolled' });
+      }
       // In a real app, we would also hit a POST /students endpoint here
       // For this mockup, we just complete and notify
       handleNextStep();

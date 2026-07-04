@@ -44,7 +44,7 @@ const DiscountManagement = () => {
                   {discount.active ? 'Active' : 'Inactive'}
                 </span>
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent)' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent-hex)' }}>
                 {discount.type === 'Percentage' ? `${discount.value}%` : `₹${discount.value}`}
               </div>
             </div>

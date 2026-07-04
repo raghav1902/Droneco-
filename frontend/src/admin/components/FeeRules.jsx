@@ -4,7 +4,7 @@ import { Calendar, AlertCircle, RefreshCw, Percent, Clock, X, Save } from 'lucid
 const RuleCard = ({ icon: Icon, title, description, value, onEdit }) => (
   <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
-      <div style={{ padding: '0.75rem', borderRadius: '50%', background: 'var(--bg-tertiary)', color: 'var(--accent)' }}>
+      <div style={{ padding: '0.75rem', borderRadius: '50%', background: 'var(--bg-tertiary)', color: 'var(--accent-hex)' }}>
         <Icon size={20} />
       </div>
       <div style={{ flex: 1 }}>

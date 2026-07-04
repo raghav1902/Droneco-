@@ -39,6 +39,8 @@ const loginUser = (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        profile_photo: user.profile_photo,
         role: user.role,
         token
       }
@@ -59,7 +61,40 @@ const getMe = (req, res) => {
   });
 };
 
+// @desc    Update current user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = (req, res) => {
+  const { name, phone, profile_photo } = req.body;
+  const user = users.find(u => u.id === req.user.id);
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  // Update fields if provided
+  if (name) user.name = name;
+  if (phone !== undefined) user.phone = phone;
+  if (profile_photo !== undefined) user.profile_photo = profile_photo;
+
+  // We should also update the req.user since it's the same object reference in memory,
+  // but to be safe we just return the updated user from the store
+  res.status(200).json({
+    success: true,
+    message: 'Profile updated successfully',
+    data: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      profile_photo: user.profile_photo,
+      role: user.role
+    }
+  });
+};
+
 module.exports = {
   loginUser,
-  getMe
+  getMe,
+  updateProfile
 };

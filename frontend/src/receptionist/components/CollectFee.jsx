@@ -111,7 +111,7 @@ const CollectFee = ({ student, onPaymentSuccess }) => {
             {/* Total */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: '1.1rem', color: 'var(--text-secondary)' }}>Total to Pay:</span>
-              <span style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--accent)' }}>
+              <span style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--accent-hex)' }}>
                 ₹{Math.max(0, totalToPay).toFixed(2)}
               </span>
             </div>
