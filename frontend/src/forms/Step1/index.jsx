@@ -8,6 +8,7 @@ const Step1 = ({
   setFormData,
   validationErrors,
   handleBasicChange,
+  handleNestedChange,
   courses,
   prevStep,
   nextStep
@@ -127,13 +128,12 @@ const Step1 = ({
                 <label className="form-label">Guardian Name *</label>
                 <input
                   type="text"
-                  name="guardian_name"
                   className="form-input"
                   placeholder="e.g. Mr. Raj Sharma"
-                  value={formData.guardian_name || ''}
-                  onChange={handleBasicChange}
+                  value={formData.guardian?.first_name || ''}
+                  onChange={(e) => handleNestedChange('guardian', 'first_name', e.target.value)}
                 />
-                {validationErrors.guardian_name && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors.guardian_name}</span>}
+                {validationErrors['guardian.first_name'] && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors['guardian.first_name']}</span>}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '1rem' }}>
@@ -141,22 +141,20 @@ const Step1 = ({
                   <label className="form-label">Guardian Mobile *</label>
                   <input
                     type="tel"
-                    name="guardian_phone"
                     className="form-input"
                     placeholder="Guardian's 10-digit number"
-                    value={formData.guardian_phone || ''}
-                    onChange={handleBasicChange}
+                    value={formData.guardian?.mobile_number || ''}
+                    onChange={(e) => handleNestedChange('guardian', 'mobile_number', e.target.value)}
                   />
-                  {validationErrors.guardian_phone && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors.guardian_phone}</span>}
+                  {validationErrors['guardian.mobile_number'] && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors['guardian.mobile_number']}</span>}
                 </div>
 
                 <div className="form-group">
                   <label className="form-label">Relationship *</label>
                   <select
-                    name="guardian_relation"
                     className="form-select"
-                    value={formData.guardian_relation || ''}
-                    onChange={handleBasicChange}
+                    value={formData.guardian?.relationship || ''}
+                    onChange={(e) => handleNestedChange('guardian', 'relationship', e.target.value)}
                   >
                     <option value="">Relation</option>
                     <option value="Father">Father</option>
@@ -164,7 +162,7 @@ const Step1 = ({
                     <option value="Guardian">Guardian</option>
                     <option value="Other">Other</option>
                   </select>
-                  {validationErrors.guardian_relation && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors.guardian_relation}</span>}
+                  {validationErrors['guardian.relationship'] && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors['guardian.relationship']}</span>}
                 </div>
               </div>
             </div>
@@ -176,17 +174,147 @@ const Step1 = ({
             </h3>
           )}
 
-          <div className="form-group">
-            <label className="form-label">{formData.filler_type === 'guardian' ? "Student's Full Name *" : 'Full Name *'}</label>
-            <input
-              type="text"
-              name="full_name"
-              className="form-input"
-              placeholder="Student Name"
-              value={formData.full_name}
-              onChange={handleBasicChange}
-            />
-            {validationErrors.full_name && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors.full_name}</span>}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+            <div className="form-group">
+              <label className="form-label">{formData.filler_type === 'guardian' ? "Student's First Name *" : 'First Name *'}</label>
+              <input
+                type="text"
+                name="full_name" // Reusing full_name as first name for backward compatibility, or should we change it? Let's use full_name as First Name
+                className="form-input"
+                placeholder="First Name"
+                value={formData.full_name}
+                onChange={handleBasicChange}
+              />
+              {validationErrors.full_name && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors.full_name}</span>}
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Middle Name</label>
+              <input
+                type="text"
+                name="middle_name"
+                className="form-input"
+                placeholder="Middle Name"
+                value={formData.middle_name}
+                onChange={handleBasicChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Last Name</label>
+              <input
+                type="text"
+                name="last_name"
+                className="form-input"
+                placeholder="Last Name"
+                value={formData.last_name}
+                onChange={handleBasicChange}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-group">
+              <label className="form-label">Gender</label>
+              <select
+                name="gender"
+                className="form-select"
+                value={formData.gender}
+                onChange={handleBasicChange}
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Date of Birth</label>
+              <input
+                type="date"
+                name="dob"
+                className="form-input"
+                value={formData.dob}
+                onChange={handleBasicChange}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-group">
+              <label className="form-label">Blood Group</label>
+              <select
+                name="blood_group"
+                className="form-select"
+                value={formData.blood_group}
+                onChange={handleBasicChange}
+              >
+                <option value="">Select</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Category</label>
+              <select
+                name="category"
+                className="form-select"
+                value={formData.category}
+                onChange={handleBasicChange}
+              >
+                <option value="">Select Category</option>
+                <option value="General">General</option>
+                <option value="OBC">OBC</option>
+                <option value="SC">SC</option>
+                <option value="ST">ST</option>
+                <option value="EWS">EWS</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+            <div className="form-group">
+              <label className="form-label">Nationality *</label>
+              <select
+                name="nationality"
+                className="form-select"
+                value={formData.nationality}
+                onChange={handleBasicChange}
+              >
+                <option value="">Select Nationality</option>
+                <option value="Indian">Indian</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Religion</label>
+              <input
+                type="text"
+                name="religion"
+                className="form-input"
+                placeholder="Religion"
+                value={formData.religion}
+                onChange={handleBasicChange}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Aadhaar Number</label>
+              <input
+                type="text"
+                name="aadhaar_number"
+                className="form-input"
+                placeholder="12-digit Aadhaar"
+                value={formData.aadhaar_number}
+                onChange={handleBasicChange}
+              />
+            </div>
           </div>
 
           <div className="form-group">
@@ -230,21 +358,7 @@ const Step1 = ({
             </div>
           </div>
 
-          <div className="form-group" style={{ marginBottom: '2.5rem' }}>
-            <label className="form-label">Interested Course *</label>
-            <select
-              name="interested_course_id"
-              className="form-select"
-              value={formData.interested_course_id}
-              onChange={handleBasicChange}
-            >
-              <option value="">-- Select a Course --</option>
-              {courses.map(course => (
-                <option key={course.id} value={course.id}>{course.course_name}</option>
-              ))}
-            </select>
-            {validationErrors.interested_course_id && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors.interested_course_id}</span>}
-          </div>
+
 
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <button className="btn btn-secondary" onClick={prevStep}>&larr; Back</button>

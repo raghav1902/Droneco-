@@ -66,15 +66,23 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/leads', require('./routes/leads'));
-app.use('/api/courses', require('./routes/courses'));
-app.use('/api/questions', require('./routes/questionRoutes'));
-app.use('/api/fees', require('./routes/feeRoutes'));
-app.use('/api/payments', require('./routes/paymentRoutes'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/discounts', require('./routes/discountRoutes'));
-app.use('/api/settings', require('./routes/settingsRoutes'));
+app.use('/api/auth', require('./src/modules/users/auth.routes'));
+app.use('/api/leads', require('./src/modules/leads/leads.routes'));
+app.use('/api/courses', require('./src/modules/core/courses.routes'));
+app.use('/api/questions', require('./src/modules/leads/questions.routes'));
+app.use('/api/fees', require('./src/modules/finance/fee.routes'));
+app.use('/api/payments', require('./src/modules/finance/payment.routes'));
+app.use('/api/admin', require('./src/modules/core/admin.routes'));
+app.use('/api/discounts', require('./src/modules/finance/discount.routes'));
+app.use('/api/settings', require('./src/modules/core/settings.routes'));
+app.use('/api/upload', require('./src/modules/core/upload.routes'));
+
+// API v2 Routes (DDD Structure)
+app.use('/api/v2/students', require('./src/modules/students/student.routes'));
+
+// Serve static uploads
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 404 Route handler
 app.use((req, res, next) => {
