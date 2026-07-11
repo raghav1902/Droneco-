@@ -11,7 +11,8 @@ const Step1 = ({
   handleNestedChange,
   courses,
   prevStep,
-  nextStep
+  nextStep,
+  formConfig
 }) => {
   return (
     <>
@@ -241,42 +242,46 @@ const Step1 = ({
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label">Blood Group</label>
-              <select
-                name="blood_group"
-                className="form-select"
-                value={formData.blood_group}
-                onChange={handleBasicChange}
-              >
-                <option value="">Select</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Category</label>
-              <select
-                name="category"
-                className="form-select"
-                value={formData.category}
-                onChange={handleBasicChange}
-              >
-                <option value="">Select Category</option>
-                <option value="General">General</option>
-                <option value="OBC">OBC</option>
-                <option value="SC">SC</option>
-                <option value="ST">ST</option>
-                <option value="EWS">EWS</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
+            {formConfig?.blood_group?.visible !== false && (
+              <div className="form-group">
+                <label className="form-label">Blood Group {formConfig?.blood_group?.required ? '*' : ''}</label>
+                <select
+                  name="blood_group"
+                  className="form-select"
+                  value={formData.blood_group}
+                  onChange={handleBasicChange}
+                >
+                  <option value="">Select</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                </select>
+              </div>
+            )}
+            {formConfig?.category?.visible !== false && (
+              <div className="form-group">
+                <label className="form-label">Category {formConfig?.category?.required ? '*' : ''}</label>
+                <select
+                  name="category"
+                  className="form-select"
+                  value={formData.category}
+                  onChange={handleBasicChange}
+                >
+                  <option value="">Select Category</option>
+                  <option value="General">General</option>
+                  <option value="OBC">OBC</option>
+                  <option value="SC">SC</option>
+                  <option value="ST">ST</option>
+                  <option value="EWS">EWS</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
@@ -293,17 +298,19 @@ const Step1 = ({
                 <option value="Other">Other</option>
               </select>
             </div>
-            <div className="form-group">
-              <label className="form-label">Religion</label>
-              <input
-                type="text"
-                name="religion"
-                className="form-input"
-                placeholder="Religion"
-                value={formData.religion}
-                onChange={handleBasicChange}
-              />
-            </div>
+            {formConfig?.religion?.visible !== false && (
+              <div className="form-group">
+                <label className="form-label">Religion {formConfig?.religion?.required ? '*' : ''}</label>
+                <input
+                  type="text"
+                  name="religion"
+                  className="form-input"
+                  placeholder="Religion"
+                  value={formData.religion}
+                  onChange={handleBasicChange}
+                />
+              </div>
+            )}
             <div className="form-group">
               <label className="form-label">Aadhaar Number</label>
               <input

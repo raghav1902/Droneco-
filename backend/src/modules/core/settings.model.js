@@ -31,6 +31,26 @@ const SettingsSchema = new mongoose.Schema({
     prefix: { type: String, default: 'REC-2026-' },
     autoNumbering: { type: Boolean, default: true },
     showLogo: { type: Boolean, default: true }
+  },
+  formConfig: {
+    guardian: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: true } },
+    address: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: true } },
+    media: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: true } },
+    category: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: true } },
+    blood_group: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: false } },
+    religion: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: false } },
+    marital_status: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: false } },
+    identification_marks: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: false } },
+    disability: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: false } },
+    qualification: { visible: { type: Boolean, default: true }, required: { type: Boolean, default: false } },
+    customFields: [{
+      id: { type: String },
+      label: { type: String },
+      type: { type: String }, // 'text', 'dropdown', 'number', 'date'
+      options: [{ type: String }],
+      required: { type: Boolean },
+      step: { type: String } // Which step to show it on (e.g. 'Personal', 'Academic', 'Course', 'Additional')
+    }]
   }
 }, {
   timestamps: true

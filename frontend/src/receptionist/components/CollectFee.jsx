@@ -16,6 +16,23 @@ const CollectFee = ({ student, onPaymentSuccess }) => {
   const [feeData, setFeeData] = useState(null);
   const [loadingFee, setLoadingFee] = useState(true);
   const [receiptData, setReceiptData] = useState(null);
+  
+  const [discountRules, setDiscountRules] = useState([]);
+  const [selectedDiscountId, setSelectedDiscountId] = useState('');
+
+  useEffect(() => {
+    const fetchDiscounts = async () => {
+      try {
+        const res = await API.get('/discounts');
+        if (res.data.success) {
+          setDiscountRules(res.data.data.filter(d => d.is_active));
+        }
+      } catch (err) {
+        console.error('Failed to fetch discounts:', err);
+      }
+    };
+    fetchDiscounts();
+  }, []);
 
   useEffect(() => {
     if (student && student.id) {
@@ -56,14 +73,24 @@ const CollectFee = ({ student, onPaymentSuccess }) => {
     );
   }
 
-  const totalToPay = (Number(amount) || 0) + (Number(lateFee) || 0) - (Number(discount) || 0);
+  const selectedDiscountRule = discountRules.find(d => d.id === selectedDiscountId || d._id === selectedDiscountId);
+  let computedDiscount = 0;
+  if (selectedDiscountRule) {
+    if (selectedDiscountRule.type === 'Percentage') {
+      computedDiscount = (feeData.due_amount * selectedDiscountRule.value) / 100;
+    } else {
+      computedDiscount = selectedDiscountRule.value;
+    }
+  }
+
+  const totalToPay = (Number(amount) || 0) + (Number(lateFee) || 0) - (Number(computedDiscount) || 0);
 
   const handlePayment = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
 
     const validation = validateForm(collectFeeSchema, {
-      amount: Number(amount),
+      amount_paid: Number(amount),
       payment_method: method,
       remarks: remarks
     });
@@ -79,7 +106,7 @@ const CollectFee = ({ student, onPaymentSuccess }) => {
         amount_paid: amount,
         payment_method: method,
         late_fee: lateFee,
-        discount_applied: discount,
+        discount_applied: computedDiscount,
         remarks: remarks
       });
       setReceiptData(response.data.data);
@@ -145,14 +172,22 @@ const CollectFee = ({ student, onPaymentSuccess }) => {
                 />
               </div>
               <div>
-                <label className="form-label">Discount (₹)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  min="0"
-                />
+                <label className="form-label">Discount Rule</label>
+                <select
+                  className="form-select"
+                  value={selectedDiscountId}
+                  onChange={(e) => setSelectedDiscountId(e.target.value)}
+                >
+                  <option value="">No Discount</option>
+                  {discountRules.map(rule => (
+                    <option key={rule.id || rule._id} value={rule.id || rule._id}>
+                      {rule.name} ({rule.type === 'Percentage' ? `${rule.value}%` : `₹${rule.value}`})
+                    </option>
+                  ))}
+                </select>
+                {computedDiscount > 0 && (
+                  <p className="text-sm text-emerald-600 mt-1">-₹{computedDiscount.toLocaleString()} applied</p>
+                )}
               </div>
             </div>
 

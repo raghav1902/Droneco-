@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import API from '../api/api';
-import { createLeadSchema, validateForm } from '../utils/validators';
+import { createLeadSchema, step1Schema, validateForm } from '../utils/validators';
 
 import Step1 from './Step1';
 import StepPersonal from './StepPersonal';
@@ -121,15 +121,22 @@ const StudentForm = () => {
   // Validation Errors per step
   const [validationErrors, setValidationErrors] = useState({});
 
+  // Form Configuration State
+  const [formConfig, setFormConfig] = useState({});
+
   useEffect(() => {
     const fetchFormMetadata = async () => {
       try {
-        const [coursesRes, questionsRes] = await Promise.all([
+        const [coursesRes, questionsRes, settingsRes] = await Promise.all([
           API.get('/courses'),
-          API.get('/questions')
+          API.get('/questions'),
+          API.get('/settings/public')
         ]);
         setCourses(coursesRes.data.data);
         setQuestions(questionsRes.data.data);
+        if (settingsRes.data.success && settingsRes.data.data.formConfig) {
+          setFormConfig(settingsRes.data.data.formConfig);
+        }
       } catch (err) {
         console.error('Error fetching form metadata:', err);
         setError('Failed to load form settings. Please refresh the page.');
@@ -206,7 +213,7 @@ const StudentForm = () => {
 
   // Validate Step 1
   const validateStep1 = () => {
-    const result = validateForm(createLeadSchema, formData);
+    const result = validateForm(step1Schema, formData);
     if (!result.success) {
       setValidationErrors(result.errors);
       return false;
@@ -376,6 +383,7 @@ const StudentForm = () => {
               courses={courses}
               prevStep={prevStep}
               nextStep={nextStep}
+              formConfig={formConfig}
             />
           )}
 
@@ -385,6 +393,7 @@ const StudentForm = () => {
               handleBasicChange={handleBasicChange}
               prevStep={prevStep}
               nextStep={nextStep}
+              formConfig={formConfig}
             />
           )}
 
@@ -395,6 +404,7 @@ const StudentForm = () => {
               validationErrors={validationErrors}
               prevStep={prevStep}
               nextStep={nextStep}
+              formConfig={formConfig}
             />
           )}
 
@@ -404,6 +414,7 @@ const StudentForm = () => {
               handleNestedChange={handleNestedChange}
               prevStep={prevStep}
               nextStep={nextStep}
+              formConfig={formConfig}
             />
           )}
 
@@ -413,6 +424,7 @@ const StudentForm = () => {
               handleNestedChange={handleNestedChange}
               prevStep={prevStep}
               nextStep={nextStep}
+              formConfig={formConfig}
             />
           )}
 
@@ -423,6 +435,7 @@ const StudentForm = () => {
               courses={courses}
               prevStep={prevStep}
               nextStep={nextStep}
+              formConfig={formConfig}
             />
           )}
 
@@ -433,6 +446,7 @@ const StudentForm = () => {
               validationErrors={validationErrors}
               prevStep={prevStep}
               nextStep={nextStep}
+              formConfig={formConfig}
             />
           )}
 

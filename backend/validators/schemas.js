@@ -9,7 +9,7 @@ const authLoginSchema = z.object({
 });
 
 const changePasswordSchema = z.object({
-  oldPassword: z.string().min(1, "Old password is required"),
+  currentPassword: z.string().min(1, "Current password is required"),
   newPassword: z.string().min(6, "New password must be at least 6 characters")
 });
 
@@ -27,20 +27,20 @@ const createParentSchema = (role) => z.object({
 });
 
 const createLeadSchema = z.object({
-  full_name: z.string().min(1, "Full name is required"),
-  email: z.string().email("Invalid email format").optional().or(z.literal('')),
-  mobile_number: z.string().regex(/^\d{10}$/, "Mobile number must be exactly 10 digits"),
-  city: z.string().min(1, "City is required"),
+  full_name: z.string().optional(),
+  email: z.string().optional(),
+  mobile_number: z.string().optional(),
+  city: z.string().optional(),
   filler_type: z.enum(['student', 'guardian']),
   
   // Basic Info extensions
   middle_name: z.string().optional(),
-  last_name: z.string().min(1, "Last Name is required"),
-  gender: z.enum(['Male', 'Female', 'Other'], { errorMap: () => ({ message: 'Gender is required' }) }),
-  dob: z.string().min(1, "Date of Birth is required"),
+  last_name: z.string().optional(),
+  gender: z.string().optional(),
+  dob: z.string().optional(),
   blood_group: z.string().optional(),
-  nationality: z.string().min(1, "Nationality is required"),
-  category: z.enum(['General', 'OBC', 'SC', 'ST', 'EWS', 'Other'], { errorMap: () => ({ message: 'Category is required' }) }),
+  nationality: z.string().optional(),
+  category: z.string().optional(),
   religion: z.string().optional(),
   aadhaar_number: z.string().optional(),
 
@@ -48,12 +48,12 @@ const createLeadSchema = z.object({
   marital_status: z.string().optional(),
   identification_mark_1: z.string().optional(),
   identification_mark_2: z.string().optional(),
-  disability_status: z.enum(['Yes', 'No']).optional(),
+  disability_status: z.string().optional(),
   disability_description: z.string().optional(),
 
   // Media
-  photo_url: z.string().min(1, "Photograph is required"),
-  signature_url: z.string().min(1, "Signature is required"),
+  photo_url: z.string().optional(),
+  signature_url: z.string().optional(),
 
   // Communication Info
   preferred_language: z.string().optional(),
@@ -101,8 +101,8 @@ const createLeadSchema = z.object({
   }).optional(),
 
   // Parent / Guardian / Emergency
-  father: createParentSchema('Father'),
-  mother: createParentSchema('Mother'),
+  father: createParentSchema('Father').optional(),
+  mother: createParentSchema('Mother').optional(),
   guardian: z.object({
     first_name: z.string().optional(),
     middle_name: z.string().optional(),
@@ -114,45 +114,23 @@ const createLeadSchema = z.object({
     address: z.string().optional()
   }).optional(),
   emergency_contact: z.object({
-    name: z.string().min(1, "Emergency Contact Name is required"),
-    relationship: z.string().min(1, "Emergency Relationship is required"),
-    mobile_number: z.string().regex(/^\d{10}$/, "Mobile number must be exactly 10 digits")
-  }),
+    name: z.string().optional(),
+    relationship: z.string().optional(),
+    mobile_number: z.string().optional()
+  }).optional(),
 
   // Course Details
   interested_course_id: z.string().optional(),
-  admission_year: z.string().min(1, "Admission Year is required"),
-  department: z.string().min(1, "Department is required"),
+  admission_year: z.string().optional(),
+  department: z.string().optional(),
   branch: z.string().optional(),
-  semester: z.string().min(1, "Semester is required"),
+  semester: z.string().optional(),
   section: z.string().optional(),
   roll_number: z.string().optional(),
   student_id: z.string().optional(),
   mode_of_admission: z.string().optional(),
 
-  responses: z.array(z.object({
-    question_id: z.string(),
-    response_value: z.string()
-  })).optional()
-}).superRefine((data, ctx) => {
-  if (data.filler_type === 'guardian') {
-    if (!data.guardian || !data.guardian.first_name) {
-      ctx.addIssue({ path: ['guardian', 'first_name'], message: 'Guardian first name is required', code: z.ZodIssueCode.custom });
-    }
-    if (!data.guardian || !data.guardian.relationship) {
-      ctx.addIssue({ path: ['guardian', 'relationship'], message: 'Relationship is required', code: z.ZodIssueCode.custom });
-    }
-    if (!data.guardian || !data.guardian.mobile_number || !phoneRegex.test(data.guardian.mobile_number)) {
-      ctx.addIssue({ path: ['guardian', 'mobile_number'], message: 'Phone number must be exactly 10 digits', code: z.ZodIssueCode.custom });
-    }
-    if (!data.full_name) {
-      ctx.addIssue({ path: ['full_name'], message: "Student's full name is required", code: z.ZodIssueCode.custom });
-    }
-  } else {
-    if (!data.mobile_number || !phoneRegex.test(data.mobile_number)) {
-      ctx.addIssue({ path: ['mobile_number'], message: 'Phone number must be exactly 10 digits', code: z.ZodIssueCode.custom });
-    }
-  }
+  responses: z.record(z.any()).optional()
 });
 
 const updateLeadStatusSchema = z.object({
@@ -181,8 +159,8 @@ const discountSchema = z.object({
 });
 
 const collectFeeSchema = z.object({
-  student_id: z.string().min(1, "Student ID is required"),
-  amount: z.number().positive("Amount must be a positive number"),
+  fee_id: z.string().min(1, "Fee ID is required"),
+  amount_paid: z.number().positive("Amount must be a positive number"),
   payment_method: z.enum(['Cash', 'UPI', 'Bank Transfer', 'Card', 'Cheque']),
   remarks: z.string().optional()
 });
@@ -205,6 +183,26 @@ const settingsSchema = z.object({
     header: z.string().optional(),
     footerMessage: z.string().optional(),
     showLogo: z.boolean().optional()
+  }).optional(),
+  formConfig: z.object({
+    guardian: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    address: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    media: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    category: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    blood_group: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    religion: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    marital_status: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    identification_marks: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    disability: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    qualification: z.object({ visible: z.boolean(), required: z.boolean() }).optional(),
+    customFields: z.array(z.object({
+      id: z.string(),
+      label: z.string(),
+      type: z.string(),
+      options: z.array(z.string()).optional(),
+      required: z.boolean(),
+      step: z.string().optional()
+    })).optional()
   }).optional()
 });
 

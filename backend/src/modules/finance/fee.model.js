@@ -6,6 +6,11 @@ const feeSchema = new mongoose.Schema({
     ref: 'Lead',
     required: [true, 'Please provide the lead ID']
   },
+  student_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student',
+    default: null
+  },
   course_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course',

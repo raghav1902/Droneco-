@@ -1,6 +1,7 @@
 import React from 'react';
+import CustomFieldsRenderer from './CustomFieldsRenderer';
 
-const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, prevStep, nextStep }) => {
+const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, prevStep, nextStep, formConfig }) => {
   const getError = (section, field) => validationErrors[`${section}.${field}`];
 
   return (
@@ -13,7 +14,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
       <div style={{ borderBottom: '1px solid hsl(var(--border))', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '1.5rem', fontWeight: 600 }}>👨 Father Details</h3>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">First Name *</label>
             <input
@@ -45,7 +46,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">Mobile Number *</label>
             <input
@@ -77,7 +78,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">Occupation *</label>
             <select
@@ -105,7 +106,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">Annual Income (₹)</label>
             <input
@@ -139,7 +140,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
       <div style={{ borderBottom: '1px solid hsl(var(--border))', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '1.5rem', fontWeight: 600 }}>👩 Mother Details</h3>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">First Name *</label>
             <input
@@ -171,7 +172,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">Mobile Number *</label>
             <input
@@ -203,7 +204,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">Occupation</label>
             <select
@@ -231,7 +232,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">Annual Income (₹)</label>
             <input
@@ -262,11 +263,12 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
       </div>
 
       {/* GUARDIAN DETAILS */}
+      {formData.filler_type !== 'guardian' && formConfig?.guardian?.visible !== false && (
       <div style={{ borderBottom: '1px solid hsl(var(--border))', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '1.5rem', fontWeight: 600 }}>👨👩👧 Guardian Details (If Applicable)</h3>
+        <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '1.5rem', fontWeight: 600 }}>👨👩👧 Guardian Details {formConfig?.guardian?.required ? '*' : '(If Applicable)'}</h3>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Fill only if living with a guardian or different from parents.</p>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">First Name</label>
             <input
@@ -296,7 +298,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">Relationship with Student</label>
             <select
@@ -336,7 +338,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
+        <div className='form-grid-1-2'>
           <div className="form-group">
             <label className="form-label">Occupation</label>
             <input
@@ -357,12 +359,13 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
       </div>
+      )}
 
       {/* EMERGENCY CONTACT */}
       <div style={{ paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '1rem', color: 'var(--danger)', marginBottom: '1.5rem', fontWeight: 600 }}>🚨 Emergency Contact</h3>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">Emergency Contact Person Name *</label>
             <input
@@ -402,6 +405,13 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
           </div>
         </div>
       </div>
+
+      <CustomFieldsRenderer
+        stepName="ParentGuardian"
+        formConfig={formConfig}
+        formData={formData}
+        handleBasicChange={(e) => handleNestedChange('customFields', e.target.name, e.target.value)} // Need to adjust this for handleBasicChange if custom fields are top level
+      />
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button className="btn btn-secondary" onClick={prevStep}>&larr; Back</button>

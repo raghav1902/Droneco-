@@ -5,74 +5,81 @@
 
 const Lead = require('./lead.model');
 const FeedbackLog = require('./feedbacklog.model');
+const Settings = require('../core/settings.model');
 
 // @desc    Create a new lead (Student Form Submission)
 // @route   POST /api/leads
 // @access  Public
 const createLead = async (req, res) => {
   try {
-    const {
-      filler_type,
-      guardian_name,
-      guardian_relation,
-      guardian_phone,
-      full_name,
-      email,
-      mobile_number,
-      city,
-      interested_course_id,
-      qualification,
-      currentClass,
-      interestedCourse,
-      interestedSubject,
-      preferredBatch,
-      learningMode,
-      queries,
-      careerGoal,
-      remarks,
-      responses,
-      feedback
-    } = req.body;
-
-    // Validate required fields dynamically
-    if (filler_type === 'guardian') {
-      if (!full_name || !city || !guardian_name || !guardian_relation || !guardian_phone) {
+    // Validate required fields dynamically (basic checks are now handled by Zod)
+    if (req.body.filler_type === 'guardian') {
+      if (!req.body.full_name || !req.body.city || !req.body.guardian?.first_name || !req.body.guardian?.mobile_number) {
         return res.status(400).json({ success: false, message: 'Please provide all required basic details, including guardian details' });
       }
     } else {
-      if (!full_name || !email || !mobile_number || !city) {
+      if (!req.body.full_name || !req.body.email || !req.body.mobile_number || !req.body.city) {
         return res.status(400).json({ success: false, message: 'Please provide all required basic details' });
       }
     }
 
-    // Create new lead object mapping fields
-    const newLead = new Lead({
-      filler_type: filler_type || 'student',
-      guardian_name: filler_type === 'guardian' ? guardian_name : undefined,
-      guardian_relation: filler_type === 'guardian' ? guardian_relation : undefined,
-      guardian_phone: filler_type === 'guardian' ? guardian_phone : undefined,
-      full_name,
-      email: email || '',
-      mobile_number: mobile_number || '',
-      city,
-      interested_course_id: interested_course_id || null,
-      qualification,
-      currentClass,
-      interestedCourse,
-      interestedSubject,
-      preferredBatch,
-      learningMode,
-      queries,
-      careerGoal,
-      remarks,
-      status: 'New',
-      assigned_to_staff_id: null,
-      responses: responses || [],
-      feedback: {
-        rating: feedback?.rating || 5,
-        source: feedback?.source || 'Direct',
-        comments: feedback?.comments || ''
+    // Dynamic Validation based on formConfig
+    const settings = await Settings.findOne();
+    if (settings && settings.formConfig) {
+      const config = settings.formConfig;
+      
+      const checkRequired = (key, value, fieldName) => {
+        if (config[key] && config[key].visible !== false && config[key].required && !value) {
+          throw new Error(`${fieldName} is required by form configuration`);
+        }
+      };
+
+      try {
+        if (req.body.filler_type !== 'guardian') checkRequired('guardian', req.body.guardian?.first_name, 'Guardian Details');
+        checkRequired('address', req.body.permanent_address?.city, 'Permanent Address City');
+        checkRequired('media', req.body.photo_url, 'Photo');
+        checkRequired('media', req.body.signature_url, 'Signature');
+        checkRequired('category', req.body.category, 'Category');
+        checkRequired('blood_group', req.body.blood_group, 'Blood Group');
+        checkRequired('religion', req.body.religion, 'Religion');
+        checkRequired('marital_status', req.body.marital_status, 'Marital Status');
+        checkRequired('identification_marks', req.body.identification_mark_1, 'Identification Mark 1');
+        checkRequired('disability', req.body.disability_status, 'Disability Status');
+        checkRequired('qualification', req.body.previous_qualification?.school_college_name, 'Previous Qualification (School/College Name)');
+        
+        // Validate custom fields
+        if (config.customFields && Array.isArray(config.customFields)) {
+          config.customFields.forEach(field => {
+            if (field.visible !== false && field.required && !req.body[field.id]) {
+               throw new Error(`Custom field "${field.label}" is required`);
+            }
+          });
+        }
+      } catch (validationErr) {
+        return res.status(400).json({ success: false, message: validationErr.message });
       }
+    }
+
+    const payloadData = { ...req.body };
+    for (const key in payloadData) {
+      if (payloadData[key] === '') {
+        delete payloadData[key];
+      }
+    }
+
+    // Transform responses from Object to Array format for MongoDB schema
+    if (payloadData.responses && !Array.isArray(payloadData.responses) && typeof payloadData.responses === 'object') {
+      payloadData.responses = Object.entries(payloadData.responses).map(([k, v]) => ({
+        question_id: k,
+        response_value: v
+      }));
+    }
+
+    // Create new lead object directly from validated req.body
+    const newLead = new Lead({
+      ...payloadData,
+      status: 'New',
+      assigned_to_staff_id: null
     });
 
     const savedLead = await newLead.save();
@@ -84,7 +91,7 @@ const createLead = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating lead:', error);
-    res.status(500).json({ success: false, message: 'Server error creating lead' });
+    res.status(500).json({ success: false, message: error.message, stack: error.stack });
   }
 };
 

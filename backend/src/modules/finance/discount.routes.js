@@ -6,16 +6,15 @@ const { authorize } = require('../../../middleware/authorization/roleMiddleware'
 const { validate } = require('../../../middleware/validationMiddleware');
 const { discountSchema } = require('../../../validators/schemas');
 
-// Protect all routes and restrict to admin
+// Protect all routes
 router.use(protect);
-router.use(authorize('admin'));
 
 router.route('/')
-  .get(getDiscounts)
-  .post(validate(discountSchema), createDiscount);
+  .get(authorize('admin', 'receptionist'), getDiscounts)
+  .post(authorize('admin'), validate(discountSchema), createDiscount);
 
 router.route('/:id')
-  .put(validate(discountSchema), updateDiscount)
-  .delete(deleteDiscount);
+  .put(authorize('admin'), validate(discountSchema), updateDiscount)
+  .delete(authorize('admin'), deleteDiscount);
 
 module.exports = router;

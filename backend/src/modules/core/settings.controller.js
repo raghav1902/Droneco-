@@ -16,12 +16,38 @@ const getSettings = async (req, res) => {
   }
 };
 
+// @desc    Get public settings (for frontend forms)
+// @route   GET /api/settings/public
+// @access  Public
+const getPublicSettings = async (req, res) => {
+  try {
+    let settings = await Settings.findOne({ type: 'global' });
+    if (!settings) {
+      settings = await Settings.create({ type: 'global' });
+    }
+    // Only return non-sensitive settings needed for the form
+    res.status(200).json({
+      success: true,
+      data: {
+        institute: {
+          name: settings.institute.name,
+          logo: settings.institute.logo
+        },
+        formConfig: settings.formConfig
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching public settings:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching settings' });
+  }
+};
+
 // @desc    Update global settings
 // @route   PUT /api/settings
 // @access  Private (Admin)
 const updateSettings = async (req, res) => {
   try {
-    const { institute, fee, receipt } = req.body;
+    const { institute, fee, receipt, formConfig } = req.body;
 
     let settings = await Settings.findOne({ type: 'global' });
     if (!settings) {
@@ -37,6 +63,9 @@ const updateSettings = async (req, res) => {
     if (receipt) {
       settings.receipt = { ...settings.receipt.toObject(), ...receipt };
     }
+    if (formConfig) {
+      settings.formConfig = formConfig; // Complete replace is fine for this UI approach
+    }
 
     const updatedSettings = await settings.save();
 
@@ -49,5 +78,6 @@ const updateSettings = async (req, res) => {
 
 module.exports = {
   getSettings,
+  getPublicSettings,
   updateSettings
 };

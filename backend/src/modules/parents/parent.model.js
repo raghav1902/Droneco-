@@ -52,9 +52,20 @@ const toTitleCase = (str) => {
 };
 
 ParentSchema.pre('save', function (next) {
-  // Recursively trim string fields
   const deepTrim = (obj) => {
-    for (let key in obj) {
+    if (!obj || typeof obj !== 'object') return;
+    if (obj instanceof Map) {
+      for (const [k, v] of obj) {
+        if (typeof v === 'string') obj.set(k, v.trim());
+      }
+      return;
+    }
+    if (Array.isArray(obj)) {
+      obj.forEach(item => deepTrim(item));
+      return;
+    }
+    for (let key of Object.keys(obj)) {
+      if (key.startsWith('_') || key.startsWith('$')) continue;
       if (typeof obj[key] === 'string') {
         obj[key] = obj[key].trim();
       } else if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -62,7 +73,8 @@ ParentSchema.pre('save', function (next) {
       }
     }
   };
-  deepTrim(this);
+  
+  deepTrim(this._doc);
 
   // Auto format names to Title Case
   const roles = ['father', 'mother', 'guardian'];

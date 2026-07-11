@@ -6,6 +6,11 @@ const paymentSchema = new mongoose.Schema({
     ref: 'Fee',
     required: [true, 'Please provide the associated Fee ID']
   },
+  student_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student',
+    default: null
+  },
   amount_paid: {
     type: Number,
     required: [true, 'Please specify the amount paid'],

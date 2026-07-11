@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../utils/toast.js';
 import { admissionSchema, validateForm } from '../../../utils/validators.js';
 import API from '../../../api/api.js';
+import StudentIdCard from '../students/StudentIdCard';
 import {
   CheckCircle, User, FileText, UploadCloud,
   CreditCard, ShieldCheck, ChevronRight, ChevronLeft, Printer, Home, X, Check, Image as ImageIcon, File, Eye, Zap
@@ -40,7 +41,6 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
     joiningDate: new Date().toISOString().split('T')[0],
     batch: '',
     section: '',
-    section: '',
     remarks: '',
     responses: lead?.responses?.reduce((acc, r) => ({ ...acc, [r.question_id]: r.response_value }), {}) || {},
 
@@ -61,12 +61,73 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
   const submitLock = React.useRef(false);
   const [uploadProgress, setUploadProgress] = useState({});
 
-  // Fee calculation (moved from render scope to component scope)
+  const [discountRules, setDiscountRules] = useState([]);
+  const [selectedDiscountId, setSelectedDiscountId] = useState('');
+  const [showIdCard, setShowIdCard] = useState(false);
+
+  useEffect(() => {
+    const fetchDiscounts = async () => {
+      try {
+        const res = await API.get('/discounts');
+        if (res.data.success) {
+          setDiscountRules(res.data.data.filter(d => d.is_active));
+        }
+      } catch (err) {
+        console.error('Failed to fetch discounts:', err);
+      }
+    };
+    fetchDiscounts();
+  }, []);
+
+  const toTitleCase = (str) => {
+    if (!str || typeof str !== 'string') return str;
+    return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  // Sync lead prop to formData in case it updates or mounts late
+  useEffect(() => {
+    if (lead) {
+      setFormData(prev => ({
+        ...prev,
+        studentName: toTitleCase(lead.full_name) || prev.studentName,
+        fatherName: toTitleCase(lead.guardian?.first_name || lead.father?.first_name) || prev.fatherName,
+        motherName: toTitleCase(lead.mother?.first_name) || prev.motherName,
+        phone: lead.mobile_number || lead.phone || prev.phone,
+        email: lead.email || prev.email,
+        address: toTitleCase(lead.city) || prev.address,
+        courseSelected: lead.interested_course_id || prev.courseSelected,
+        inquiryDate: lead.created_at ? new Date(lead.created_at).toISOString().split('T')[0] : prev.inquiryDate,
+        dob: lead.dob ? new Date(lead.dob).toISOString().split('T')[0] : prev.dob,
+        gender: lead.gender || prev.gender,
+        bloodGroup: lead.blood_group || prev.bloodGroup,
+        emergencyContact: lead.emergency_contact?.mobile_number || lead.guardian?.mobile_number || lead.father?.mobile_number || prev.emergencyContact,
+        qualification: toTitleCase(lead.qualification || lead.previous_qualification?.school_college_name) || prev.qualification,
+        occupation: toTitleCase(lead.occupation) || prev.occupation,
+        batch: lead.preferredBatch || prev.batch,
+        section: toTitleCase(lead.section) || prev.section,
+        responses: lead.responses?.reduce((acc, r) => ({ ...acc, [r.question_id]: r.response_value }), {}) || prev.responses
+      }));
+    }
+  }, [lead]);
+
+  // Dynamically fetch the selected course object
+  const selectedCourseObj = courses?.find(c => c.id === formData.courseSelected || c._id === formData.courseSelected);
+  
   const admissionFee = 2500;
-  const courseFee = 45000;
-  const discount = formData.courseSelected ? 5000 : 0;
-  const tax = (courseFee - discount) * 0.18;
-  const totalPayable = admissionFee + courseFee - discount + tax;
+  const courseFee = selectedCourseObj?.fee_structure?.total_fee || 45000;
+  
+  const selectedDiscountRule = discountRules.find(d => d.id === selectedDiscountId || d._id === selectedDiscountId);
+  let discountAmount = 0;
+  if (selectedDiscountRule) {
+    if (selectedDiscountRule.type === 'Percentage') {
+      discountAmount = (courseFee * selectedDiscountRule.value) / 100;
+    } else {
+      discountAmount = selectedDiscountRule.value;
+    }
+  }
+
+  const tax = (courseFee - discountAmount) * 0.18;
+  const totalPayable = admissionFee + courseFee - discountAmount + tax;
 
   const handleNextStep = () => {
     if (currentStep === 1) {
@@ -87,7 +148,15 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    let formattedValue = value;
+    
+    // Auto capitalize specific fields
+    const titleCaseFields = ['studentName', 'fatherName', 'motherName', 'address', 'qualification', 'occupation', 'section'];
+    if (titleCaseFields.includes(name) && typeof formattedValue === 'string') {
+      formattedValue = toTitleCase(formattedValue);
+    }
+    
+    setFormData(prev => ({ ...prev, [name]: formattedValue }));
   };
 
   const handleResponseChange = (questionId, value) => {
@@ -151,7 +220,7 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
         lead_id: lead.id,
         course_id: String(formData.courseSelected),
         total_amount: admissionFee + courseFee,
-        discount_amount: discount,
+        discount_amount: discountAmount,
         tax_amount: tax
       };
 
@@ -163,9 +232,6 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
         setIsSubmitting(false);
         return;
       }
-
-      // Mark lead as Enrolled
-      await API.patch(`/leads/${lead.id}/status`, { status: 'Enrolled' });
 
       // Create Fee Structure
       const feeRes = await API.post('/fees', payload);
@@ -180,6 +246,13 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
           payment_method: formData.paymentMethod,
           remarks: 'Initial Admission Payment'
         });
+      }
+
+      // Admit Student: Creates Student, Parent, updates Lead, and links Fee/Payment
+      const admitRes = await API.post(`/v2/students/admit/${lead.id}`, { formData });
+      if (admitRes.data?.data?.student) {
+        const studentObj = admitRes.data.data.student;
+        setStudentId(studentObj.enrollment_number || studentObj.student_id || studentObj.id);
       }
 
       // ONLY navigate to Finish step on success, do not reset isSubmitting
@@ -449,9 +522,23 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
                       <span className="text-muted-foreground">Course Fee ({getCourseName(formData.courseSelected)})</span>
                       <span className="font-medium text-foreground">₹{courseFee.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between py-3 border-b border-border/50">
+                    <div className="flex justify-between py-3 border-b border-border/50 items-center">
                       <span className="text-muted-foreground">Special Discount</span>
-                      <span className="font-medium text-emerald-600">-₹{discount.toLocaleString()}</span>
+                      <div className="flex items-center gap-4">
+                        <select
+                          className="form-select text-sm py-1 px-2 border-border/50"
+                          value={selectedDiscountId}
+                          onChange={(e) => setSelectedDiscountId(e.target.value)}
+                        >
+                          <option value="">No Discount</option>
+                          {discountRules.map(rule => (
+                            <option key={rule.id || rule._id} value={rule.id || rule._id}>
+                              {rule.name} ({rule.type === 'Percentage' ? `${rule.value}%` : `₹${rule.value}`})
+                            </option>
+                          ))}
+                        </select>
+                        <span className="font-medium text-emerald-600">-₹{discountAmount.toLocaleString()}</span>
+                      </div>
                     </div>
                     <div className="flex justify-between py-3 border-b border-border/50">
                       <span className="text-muted-foreground">GST (18%)</span>
@@ -471,7 +558,7 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
                     <label className="form-label">Amount to Collect Today</label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₹</span>
-                      <input type="number" className="form-input pl-8 text-lg font-semibold" value={formData.amountCollected} onChange={(e) => setFormData({ ...formData, amountCollected: e.target.value })} placeholder="0.00" />
+                      <input type="number" className="form-input text-lg font-semibold" style={{ paddingLeft: '2rem' }} value={formData.amountCollected} onChange={(e) => setFormData({ ...formData, amountCollected: e.target.value })} placeholder="0.00" />
                     </div>
                   </div>
                   <div className="form-group mb-0">
@@ -527,7 +614,7 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
 
             <div className="flex flex-wrap justify-center gap-4">
               <button className="btn btn-secondary flex items-center gap-2"><Printer className="w-4 h-4" /> Print Receipt</button>
-              <button className="btn btn-secondary flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Print ID Card</button>
+              <button onClick={() => setShowIdCard(true)} className="btn btn-secondary flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Print ID Card</button>
               <button onClick={onComplete} className="btn btn-primary flex items-center gap-2"><Home className="w-4 h-4" /> Return to Dashboard</button>
             </div>
           </motion.div>
@@ -550,7 +637,11 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
             <X className="w-5 h-5" />
           </button>
         )}
-      </div>
+
+      {showIdCard && (
+        <StudentIdCard student={{ ...formData, id: studentId }} onClose={() => setShowIdCard(false)} />
+      )}
+    </div>
 
       {/* Stepper */}
       <div className="bg-card border-b border-border px-8 py-6 shrink-0">

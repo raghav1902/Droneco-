@@ -1,6 +1,7 @@
 import React from 'react';
+import CustomFieldsRenderer from './CustomFieldsRenderer';
 
-const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep }) => {
+const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep, formConfig }) => {
   return (
     <div className="animate-fade-in">
       <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '2.25rem', letterSpacing: '-0.010em' }}>
@@ -12,68 +13,74 @@ const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep }) => {
           Personal Information
         </h3>
 
-        <div className="form-group">
-          <label className="form-label">Marital Status</label>
-          <select
-            name="marital_status"
-            className="form-select"
-            value={formData.marital_status}
-            onChange={handleBasicChange}
-          >
-            <option value="">Select</option>
-            <option value="Single">Single</option>
-            <option value="Married">Married</option>
-          </select>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        {formConfig?.marital_status?.visible !== false && (
           <div className="form-group">
-            <label className="form-label">Identification Mark 1</label>
-            <input
-              type="text"
-              name="identification_mark_1"
-              className="form-input"
-              value={formData.identification_mark_1}
-              onChange={handleBasicChange}
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Identification Mark 2</label>
-            <input
-              type="text"
-              name="identification_mark_2"
-              className="form-input"
-              value={formData.identification_mark_2}
-              onChange={handleBasicChange}
-            />
-          </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
-          <div className="form-group">
-            <label className="form-label">Disability Status</label>
+            <label className="form-label">Marital Status {formConfig?.marital_status?.required ? '*' : ''}</label>
             <select
-              name="disability_status"
+              name="marital_status"
               className="form-select"
-              value={formData.disability_status}
+              value={formData.marital_status}
               onChange={handleBasicChange}
             >
-              <option value="No">No</option>
-              <option value="Yes">Yes</option>
+              <option value="">Select</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
             </select>
           </div>
-          <div className="form-group">
-            <label className="form-label">Disability Description (If applicable)</label>
-            <input
-              type="text"
-              name="disability_description"
-              className="form-input"
-              value={formData.disability_description}
-              onChange={handleBasicChange}
-              disabled={formData.disability_status !== 'Yes'}
-            />
+        )}
+
+        {formConfig?.identification_marks?.visible !== false && (
+          <div className='form-grid-2'>
+            <div className="form-group">
+              <label className="form-label">Identification Mark 1 {formConfig?.identification_marks?.required ? '*' : ''}</label>
+              <input
+                type="text"
+                name="identification_mark_1"
+                className="form-input"
+                value={formData.identification_mark_1}
+                onChange={handleBasicChange}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Identification Mark 2</label>
+              <input
+                type="text"
+                name="identification_mark_2"
+                className="form-input"
+                value={formData.identification_mark_2}
+                onChange={handleBasicChange}
+              />
+            </div>
           </div>
-        </div>
+        )}
+
+        {formConfig?.disability?.visible !== false && (
+          <div className='form-grid-1-2'>
+            <div className="form-group">
+              <label className="form-label">Disability Status {formConfig?.disability?.required ? '*' : ''}</label>
+              <select
+                name="disability_status"
+                className="form-select"
+                value={formData.disability_status}
+                onChange={handleBasicChange}
+              >
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Disability Description (If applicable)</label>
+              <input
+                type="text"
+                name="disability_description"
+                className="form-input"
+                value={formData.disability_description}
+                onChange={handleBasicChange}
+                disabled={formData.disability_status !== 'Yes'}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={{ paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
@@ -81,7 +88,7 @@ const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep }) => {
           Communication Information
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">Preferred Language</label>
             <input
@@ -116,6 +123,13 @@ const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep }) => {
           />
         </div>
       </div>
+
+      <CustomFieldsRenderer
+        stepName="Personal"
+        formConfig={formConfig}
+        formData={formData}
+        handleBasicChange={handleBasicChange}
+      />
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button className="btn btn-secondary" onClick={prevStep}>&larr; Back</button>

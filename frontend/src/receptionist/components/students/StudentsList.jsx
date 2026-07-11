@@ -3,20 +3,29 @@ import { Eye, Edit, CreditCard, Printer, MoreVertical, Search, Filter, UserPlus,
 import { showToast } from '../../../utils/toast.js';
 
 import API from '../../../api/api.js';
+import StudentIdCard from './StudentIdCard';
 
 const StudentsList = ({ onViewProfile, onCollectFee, onEnrollNew, onEditStudent }) => {
   const [search, setSearch] = useState('');
   const [activeMenu, setActiveMenu] = useState(null);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [printStudent, setPrintStudent] = useState(null);
 
   React.useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const res = await API.get('/leads');
-        // Filter those who are Enrolled
-        const enrolled = res.data.data.filter(l => l.status === 'Enrolled');
-        setStudents(enrolled);
+        const res = await API.get('/v2/students');
+        const mappedStudents = res.data.data.map(s => ({
+          ...s,
+          id: s._id,
+          full_name: `${s.personal_info?.first_name || ''} ${s.personal_info?.last_name || ''}`.trim(),
+          email: s.contact_info?.email || 'N/A',
+          mobile_number: s.contact_info?.mobile_number || 'N/A',
+          interested_course_id: { course_name: s.department_id?.name || 'N/A' },
+          status: s.status === 'ACTIVE' ? 'Enrolled' : s.status
+        }));
+        setStudents(mappedStudents);
       } catch (error) {
         console.error('Failed to fetch students:', error);
       } finally {
@@ -155,41 +164,7 @@ const StudentsList = ({ onViewProfile, onCollectFee, onEnrollNew, onEditStudent 
                         <div className="h-px bg-border my-1"></div>
                         <button className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted flex items-center gap-2" onClick={() => {
                           setActiveMenu(null);
-                          const printWindow = window.open('', '', 'width=600,height=400');
-                          printWindow.document.write(`
-                            <html>
-                              <head>
-                                <title>ID Card - ${student.full_name}</title>
-                                <style>
-                                  body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f0f0; }
-                                  .card { width: 300px; height: 450px; background: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; overflow: hidden; border: 2px solid #333; }
-                                  .header { background: #1a365d; color: white; padding: 15px; font-weight: bold; font-size: 20px; }
-                                  .photo { width: 100px; height: 100px; background: #ddd; border-radius: 50%; margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 36px; border: 3px solid #1a365d; }
-                                  .name { font-size: 22px; font-weight: bold; margin: 10px 0 5px; }
-                                  .id { color: #666; margin-bottom: 20px; font-size: 14px; }
-                                  .details { text-align: left; padding: 0 20px; font-size: 14px; line-height: 1.6; }
-                                  .footer { background: #f8f9fa; padding: 10px; position: absolute; bottom: 0; width: 100%; border-top: 1px solid #eee; font-size: 12px; }
-                                </style>
-                              </head>
-                              <body>
-                                <div class="card">
-                                  <div class="header">INSTITUTE ID</div>
-                                  <div class="photo">${student.full_name?.charAt(0) || 'S'}</div>
-                                  <div class="name">${student.full_name}</div>
-                                  <div class="id">ID: ${student.id || student._id}</div>
-                                  <div class="details">
-                                    <div><strong>Course:</strong> ${student.interested_course_id || 'Enrolled'}</div>
-                                    <div><strong>Phone:</strong> ${student.mobile_number}</div>
-                                    <div><strong>Blood Group:</strong> O+ (Example)</div>
-                                  </div>
-                                </div>
-                                <script>
-                                  setTimeout(() => { window.print(); window.close(); }, 500);
-                                </script>
-                              </body>
-                            </html>
-                          `);
-                          printWindow.document.close();
+                          setPrintStudent(student);
                         }}>
                           <Printer className="w-4 h-4 text-muted-foreground" /> Print ID Card
                         </button>
@@ -212,6 +187,10 @@ const StudentsList = ({ onViewProfile, onCollectFee, onEnrollNew, onEditStudent 
           </tbody>
         </table>
       </div>
+      
+      {printStudent && (
+        <StudentIdCard student={printStudent} onClose={() => setPrintStudent(null)} />
+      )}
     </div>
   );
 };

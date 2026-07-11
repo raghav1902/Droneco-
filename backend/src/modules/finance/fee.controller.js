@@ -94,8 +94,31 @@ const getFeesByStudent = async (req, res) => {
   }
 };
 
+// @desc    Get all fees
+// @route   GET /api/fees
+// @access  Private (Admin, Receptionist)
+const getFees = async (req, res) => {
+  try {
+    const fees = await Fee.find()
+      .populate('lead_id', 'full_name last_name email mobile_number status')
+      .populate('student_id', 'personal_info.first_name personal_info.last_name contact_info.email enrollment_number')
+      .populate('course_id', 'name level')
+      .sort({ created_at: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: fees.length,
+      data: fees
+    });
+  } catch (error) {
+    console.error('Error fetching all fees:', error);
+    res.status(500).json({ success: false, message: 'Server error fetching fees' });
+  }
+};
+
 module.exports = {
   createFee,
   getDueFees,
-  getFeesByStudent
+  getFeesByStudent,
+  getFees
 };

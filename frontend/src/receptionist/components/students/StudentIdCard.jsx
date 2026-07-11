@@ -1,9 +1,37 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Printer, X } from 'lucide-react';
+import API from '../../../api/api';
 
 const StudentIdCard = ({ student, onClose }) => {
   const printRef = useRef();
+  const [courseName, setCourseName] = useState(
+    student?.courseName ||
+    student?.interestedCourse ||
+    student?.department_id?.course_name ||
+    student?.interested_course_id?.course_name ||
+    'N/A'
+  );
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      const courseId = student?.courseSelected || 
+                       (typeof student?.department_id === 'string' ? student.department_id : student?.department_id?._id) ||
+                       (typeof student?.interested_course_id === 'string' ? student.interested_course_id : student?.interested_course_id?._id);
+
+      if (courseId && courseId.length === 24 && (courseName === 'N/A' || !courseName)) {
+        try {
+          const res = await API.get(`/courses/${courseId}`);
+          if (res.data?.success && res.data.data) {
+            setCourseName(res.data.data.course_name);
+          }
+        } catch (err) {
+          console.error('Failed to fetch course for ID card', err);
+        }
+      }
+    };
+    fetchCourse();
+  }, [student, courseName]);
 
   const handlePrint = () => {
     const printContent = printRef.current.innerHTML;
@@ -11,13 +39,42 @@ const StudentIdCard = ({ student, onClose }) => {
 
     document.body.innerHTML = `
       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&display=swap');
         @media print {
           @page { size: auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 20px; font-family: sans-serif; display: flex; justify-content: center; align-items: flex-start; height: 100vh; background: white; }
-          .id-card-wrapper { display: flex; flex-direction: column; gap: 20px; align-items: center; }
-          .id-card { width: 350px; height: 550px; border: 1px solid #ccc; border-radius: 12px; overflow: hidden; background: white; box-shadow: none; position: relative; page-break-inside: avoid; }
-          .id-card * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: white; }
+          .id-card-wrapper { display: block; text-align: center; }
+          .id-card-canvas { display: inline-block; margin: 0 auto 40px auto; page-break-inside: avoid; page-break-after: always; }
+          .id-card-canvas:last-child { page-break-after: auto; }
           .no-print { display: none !important; }
+        }
+        .id-card-canvas {
+            width: 320px;
+            height: 500px;
+            background-color: #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e5e9e6;
+        }
+        .watermark-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140%;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+            filter: grayscale(1);
+        }
+        .watermark-logo {
+            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPEXaoWad8hP26_3puwLVah438EjNkrHW7mRJYyAEOBLqnQLeEh8HMGvtNLhs4R3StfgYqtm6a2GDe6nHpwk0A7qmC8gyVlQGMSaiEjWUGHjQ-w-I0JQvH1MY2JVabuiX9nYJmgVyPucN3GKVAB9fIRrYIhYaFy2mqQGL62Tigp75gBVCP5McFll34lyT9wmUR4AeJErJPhL4EIR9dQRuuCHpBMG7s_pA-VML2IuQp-Av0I9Qhr6nIYkwD3_-4-R7nUJ4');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.04;
+            transform: scale(1.5) rotate(-15deg);
         }
       </style>
       <div class="id-card-wrapper">${printContent}</div>
@@ -32,33 +89,35 @@ const StudentIdCard = ({ student, onClose }) => {
 
   // Formatting dates and fields
   const joinDate = new Date(student.created_at || Date.now()).getFullYear();
-  const validTill = new Date(joinDate + 4, 6, 31).getFullYear(); // Assuming 4 year validity
+  const validTill = new Date(joinDate + 4, 6, 31).getFullYear();
   const answers = student.answers || {};
-  
-  // Try to extract some useful data from dynamic answers if available
-  const fatherName = answers['Father Name'] || answers['father_name'] || 'N/A';
-  const motherName = answers['Mother Name'] || answers['mother_name'] || 'N/A';
-  const bloodGroup = answers['Blood Group'] || answers['blood_group'] || 'O+';
-  const emergencyContact = answers['Emergency Contact'] || answers['emergency_contact'] || 'N/A';
-  const address = answers['Address'] || answers['address'] || student.city || 'N/A';
+
+  const fatherName = student.fatherName || student.parent_info?.father_name || answers['Father Name'] || answers['father_name'] || 'N/A';
+  const motherName = student.motherName || student.parent_info?.mother_name || answers['Mother Name'] || answers['mother_name'] || 'N/A';
+  const bloodGroup = student.bloodGroup || student.personal_info?.blood_group || answers['Blood Group'] || answers['blood_group'] || 'O+';
+  const emergencyContact = student.emergencyContact || student.emergency_contact?.mobile_number || answers['Emergency Contact'] || answers['emergency_contact'] || 'N/A';
+  const address = student.address || student.addresses?.current?.city || student.contact_info?.current_address || answers['Address'] || answers['address'] || student.city || 'N/A';
+
+  // Format ID padded
+  const displayId = student.id ? student.id.slice(-6).toUpperCase() : '000000';
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex justify-center items-center overflow-y-auto p-4 sm:p-8">
-      <div className="bg-card w-full max-w-4xl rounded-xl shadow-2xl border border-border flex flex-col md:flex-row overflow-hidden relative">
-        
+      <div className="bg-card w-full max-w-5xl rounded-xl shadow-2xl border border-border flex flex-col md:flex-row overflow-hidden relative">
+
         {/* Controls */}
-        <div className="bg-muted p-6 border-b md:border-b-0 md:border-r border-border flex flex-col items-center justify-center gap-6 md:w-64">
+        <div className="bg-muted p-6 border-b md:border-b-0 md:border-r border-border flex flex-col items-center justify-center gap-6 md:w-64 shrink-0">
           <div className="text-center">
             <h2 className="text-xl font-bold">Print ID Card</h2>
             <p className="text-sm text-muted-foreground mt-2">Use high-quality PVC or glossy paper for best results.</p>
           </div>
-          <button 
+          <button
             onClick={handlePrint}
             className="btn btn-primary w-full gap-2 shadow-sm"
           >
             <Printer className="w-5 h-5" /> Print Now
           </button>
-          <button 
+          <button
             onClick={onClose}
             className="btn btn-secondary w-full gap-2 shadow-sm"
           >
@@ -67,96 +126,208 @@ const StudentIdCard = ({ student, onClose }) => {
         </div>
 
         {/* Printable Area Container */}
-        <div className="p-8 flex-1 flex flex-col lg:flex-row items-center justify-center gap-8 bg-slate-50 overflow-auto">
+        <div className="p-8 flex-1 flex flex-col lg:flex-row items-center justify-center gap-8 bg-[#f7faf8] overflow-auto">
+
+          <style dangerouslySetInnerHTML={{
+            __html: `
+            @import url('https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&display=swap');
+            .id-card-canvas {
+                width: 320px;
+                height: 500px;
+                background-color: #ffffff;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                position: relative;
+                overflow: hidden;
+                border: 1px solid #e5e9e6;
+            }
+            .watermark-overlay {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 140%;
+                opacity: 0.03;
+                pointer-events: none;
+                z-index: 0;
+                filter: grayscale(1);
+            }
+            .watermark-logo {
+                background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPEXaoWad8hP26_3puwLVah438EjNkrHW7mRJYyAEOBLqnQLeEh8HMGvtNLhs4R3StfgYqtm6a2GDe6nHpwk0A7qmC8gyVlQGMSaiEjWUGHjQ-w-I0JQvH1MY2JVabuiX9nYJmgVyPucN3GKVAB9fIRrYIhYaFy2mqQGL62Tigp75gBVCP5McFll34lyT9wmUR4AeJErJPhL4EIR9dQRuuCHpBMG7s_pA-VML2IuQp-Av0I9Qhr6nIYkwD3_-4-R7nUJ4');
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                opacity: 0.04;
+                transform: scale(1.5) rotate(-15deg);
+            }
+            .font-signature { font-family: 'Mrs Saint Delafield', cursive; }
+          `}} />
+
           <div ref={printRef} className="flex flex-col lg:flex-row gap-8 id-card-wrapper">
-            
+
             {/* FRONT OF ID CARD */}
-            <div className="id-card w-[350px] h-[550px] bg-white border border-gray-300 rounded-xl overflow-hidden shadow-lg relative flex flex-col shrink-0" style={{ fontFamily: 'sans-serif' }}>
-              {/* Header */}
-              <div className="bg-[#1e3a8a] text-white p-4 text-center shrink-0">
-                <div className="w-12 h-12 bg-white rounded-full mx-auto mb-2 flex items-center justify-center">
-                  <span className="text-[#1e3a8a] font-bold text-xl">ABC</span>
+            <div className="id-card-canvas rounded-xl flex flex-col bg-[#ffffff] shrink-0">
+              <div className="absolute top-0 left-0 w-full h-1 bg-[#9e1a22] z-20"></div>
+              <img alt="Watermark" className="watermark-overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBV1JGG6ZbehUqACAhQdLpCK_SkCFb5agKmKLdPWz07GHRFimrJN-P-0JVzJwmmfJ71fKuvbl_Wy1GBxwcd56cHV_NXw6F8VGgZcftlWKTGVpBsxVEYEt_93cGhwXn0gaf3zsJELlvRyJDhfWlf8I8DX3sQiDlC7IyT5593jky_J-H8a2khPGBToq8BoxnBMcqv-k8DFqWNWJqyxejFnmvVdE8YDCfcvG8Tfhcd3OXYewOxKEjpQuuGjaje2EvHzeaOabs" />
+              <div className="relative z-10 flex-grow flex flex-col px-4 pt-6 pb-4">
+
+                {/* Header Logo Section */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2">
+                    <img alt="Droneco Logo" className="w-7 h-7 object-contain rounded" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBm-qINd7tQoIxc4y2CPmwxXWRDMbeCrYYunPmPLGhgrSnR8kQtNhMUvS2cumwCvEUvbW7INGNVQW4oU4XF-XtIwFCMfO7rih9jeaKB9pieBwJnDQTAn0a6-f-GAko6f414vchcuhVh3EJEi6CskRXvd5K4Z2lEiYN4vlVVH1fjktOfhuhgS7M6kPJcsCFeTbYmIs8uNXn993K-LmWu5vNi66tCrPIzGdHALp2x90SmKSc1c4xkliorWiGDW-8FMgVN6CQ" />
+                    <span className="text-[12px] text-[#004f45] font-bold tracking-tight uppercase">DRONECO INSTITUTE</span>
+                  </div>
+                  <span className="text-[#6e7976] font-bold uppercase tracking-[0.2em] text-[10px]">Front Panel</span>
                 </div>
-                <h3 className="font-bold text-lg leading-tight">ABC INSTITUTE OF TECHNOLOGY</h3>
-                <p className="text-[10px] opacity-90 mt-1">Approved by AICTE | Affiliated to RTU</p>
-                <div className="mt-2 bg-white text-[#1e3a8a] font-bold text-xs py-1 rounded mx-4 shadow-sm">
-                  STUDENT IDENTITY CARD
+
+                {/* Student Image Section */}
+                <div className="flex justify-center mb-4 mt-2">
+                  <div className="relative">
+                    <div className="w-28 h-28 rounded-full border-[4px] border-[#9e1a22]/10 shadow-lg overflow-hidden bg-white">
+                      {student.photo_url ? (
+                        <img className="w-full h-full object-cover" alt="Student Headshot" src={student.photo_url} />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">No Photo</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
+
+                {/* Name & ID */}
+                <div className="text-center mb-6">
+                  <h2 className="text-[20px] text-[#004f45] font-extrabold uppercase tracking-tight leading-tight">
+                    {student.full_name || student.studentName || `${student.personal_info?.first_name || ''} ${student.personal_info?.last_name || ''}`.trim() || 'STUDENT'}
+                  </h2>
+                  <div className="inline-block px-3 py-0.5 border border-[#9e1a22]/30 bg-[#9e1a22]/5 rounded-full mt-1">
+                    <p className="font-mono text-[11px] text-[#9e1a22] font-bold">ID: DRN-{joinDate}-{displayId}</p>
+                  </div>
+                </div>
+
+                {/* Details List */}
+                <div className="flex flex-col gap-2 px-2">
+                  <div className="flex justify-between items-center border-b border-[#9e1a22]/10 pb-1">
+                    <span className="text-[9px] text-[#9e1a22] font-bold uppercase tracking-wider">Phone</span>
+                    <span className="text-[13px] text-[#181c1b] font-semibold">{student.phone || student.contact_info?.mobile_number || student.mobile_number || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-[#9e1a22]/10 pb-1">
+                    <span className="text-[9px] text-[#9e1a22] font-bold uppercase tracking-wider">Course</span>
+                    <span className="text-[13px] text-[#181c1b] font-semibold text-right max-w-[160px] truncate">{courseName}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-[#9e1a22]/10 pb-1">
+                    <span className="text-[9px] text-[#9e1a22] font-bold uppercase tracking-wider">Department</span>
+                    <span className="text-[13px] text-[#181c1b] font-semibold">Engineering</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[9px] text-[#9e1a22] font-bold uppercase tracking-wider">Session</span>
+                    <span className="text-[13px] text-[#181c1b] font-semibold">{joinDate}-{validTill}</span>
+                  </div>
+                </div>
+
+                {/* Footer Section: Signature */}
+                <footer className="mt-auto pt-4 flex justify-center">
+                  <div className="flex flex-col items-center">
+                    <span className="font-signature text-[28px] text-[#004f45]/80 h-8 flex items-center select-none">H. Miller</span>
+                    <div className="w-32 border-t border-[#9e1a22]/30 mt-1"></div>
+                    <span className="text-[9px] text-[#6e7976] mt-1 font-bold tracking-widest uppercase">Principal</span>
+                  </div>
+                </footer>
               </div>
-
-              {/* Body */}
-              <div className="flex-1 p-4 flex flex-col">
-                <div className="flex gap-4 mb-4">
-                  <div className="w-24 h-28 bg-gray-200 border-2 border-gray-300 shrink-0 flex items-center justify-center text-gray-400 text-sm overflow-hidden rounded">
-                    PHOTO
-                  </div>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <h2 className="font-bold text-lg text-gray-900 leading-tight mb-1">{student.full_name}</h2>
-                    <p className="text-xs text-gray-600 mb-1"><span className="font-semibold w-16 inline-block">ID:</span> {student.id || student._id}</p>
-                    <p className="text-xs text-gray-600 mb-1"><span className="font-semibold w-16 inline-block">Phone:</span> {student.phone}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-y-2 text-xs text-gray-800 flex-1">
-                  <div><span className="font-semibold text-gray-500 block text-[10px]">Course</span><span className="font-medium">{student.interested_course_id || 'B.Tech'}</span></div>
-                  <div><span className="font-semibold text-gray-500 block text-[10px]">Department</span><span className="font-medium">Engineering</span></div>
-                  <div><span className="font-semibold text-gray-500 block text-[10px]">Blood Group</span><span className="font-medium text-red-600">{bloodGroup}</span></div>
-                  <div><span className="font-semibold text-gray-500 block text-[10px]">Session</span><span className="font-medium">{joinDate}-{joinDate+4}</span></div>
-                </div>
-
-                {/* Footer / Signatures */}
-                <div className="flex items-end justify-between mt-4 border-t border-gray-100 pt-3 shrink-0">
-                  <div className="w-16 h-16 bg-white p-1 border border-gray-200 rounded">
-                    <QRCodeSVG value={student.id || student._id || 'none'} size={54} />
-                  </div>
-                  <div className="text-center">
-                    <div className="w-24 border-b border-gray-800 mb-1"></div>
-                    <p className="text-[10px] text-gray-600 font-semibold">Principal</p>
-                  </div>
-                </div>
-              </div>
-              {/* Colored bottom bar */}
-              <div className="h-2 bg-yellow-500 w-full shrink-0"></div>
             </div>
 
             {/* BACK OF ID CARD */}
-            <div className="id-card w-[350px] h-[550px] bg-white border border-gray-300 rounded-xl overflow-hidden shadow-lg relative flex flex-col shrink-0" style={{ fontFamily: 'sans-serif' }}>
-              <div className="bg-gray-100 p-3 text-center border-b border-gray-200 shrink-0">
-                <h3 className="font-bold text-sm text-gray-700">PERSONAL INFORMATION</h3>
-              </div>
-              
-              <div className="flex-1 p-5 flex flex-col text-xs text-gray-800">
-                <div className="mb-4">
-                  <span className="font-semibold text-gray-500 block mb-1">Parent Details</span>
-                  <p className="mb-1"><span className="w-16 inline-block">Father:</span> {fatherName}</p>
-                  <p><span className="w-16 inline-block">Mother:</span> {motherName}</p>
-                </div>
-                
-                <div className="mb-4">
-                  <span className="font-semibold text-gray-500 block mb-1">Emergency Contact</span>
-                  <p className="font-medium">{emergencyContact}</p>
-                </div>
-                
-                <div className="mb-4">
-                  <span className="font-semibold text-gray-500 block mb-1">Address</span>
-                  <p className="leading-snug">{address}</p>
+            <div className="id-card-canvas w-[320px] flex flex-col bg-[#ffffff] relative border border-[#bec9c5]/30 rounded-xl shadow-sm overflow-hidden shrink-0">
+              <div className="absolute inset-0 watermark-logo z-0"></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-[#9e1a22] z-20"></div>
+
+              <div className="flex-1 flex flex-col p-6 relative z-10">
+                {/* Header Branding */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2">
+                    <img alt="Droneco Logo" className="w-7 h-7 object-contain rounded" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw0jj2rH3IHNc7ELhBvJqAoLGHSeMGVt4LwUtvNKhFN0Rwvis_W029eDPLkAiQzVUJHv3B7_zUbMC-atFp6GHm2JYc_qJmRfH54QGvn7mNVyFvC_kIvUiofXyhSKsj_wS188ZoBrJqruvo1UMqaGaF6TUpANsDEUty1E-fzBOhxaqfNvNv-oyuRdXAGXXMgtvN_Iy8j2TPQ1sZgqLd8Q0sII7UR953NMRxVd5HZeY3gWlFOVCbwCkIBFHKxjlI99nTSkk" />
+                    <span className="text-[12px] text-[#004f45] font-bold tracking-tight uppercase">DRONECO INSTITUTE</span>
+                  </div>
+                  <span className="text-[#6e7976] font-bold uppercase tracking-[0.2em] text-[10px]">Back Panel</span>
                 </div>
 
-                <div className="mb-4 border-t border-gray-200 pt-4 mt-auto">
-                  <span className="font-semibold text-gray-500 block mb-1">Institute Contact</span>
-                  <p className="mb-1">+91 12345 67890</p>
-                  <p className="mb-1">admin@abcinstitute.edu</p>
-                  <p>www.abcinstitute.edu</p>
+                {/* Section 1: Personal Info */}
+                <section className="mb-6">
+                  <h3 className="text-[#9e1a22] text-[11px] font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-[#9e1a22] rounded-full"></span>
+                    Personal Information
+                  </h3>
+                  <div className="grid grid-cols-2 gap-y-2 px-1">
+                    <div>
+                      <p className="text-[9px] text-[#6e7976] font-bold uppercase">Father</p>
+                      <p className="text-[14px] text-[#181c1b] font-semibold truncate">{fatherName}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-[#6e7976] font-bold uppercase">Mother</p>
+                      <p className="text-[14px] text-[#181c1b] font-semibold truncate">{motherName}</p>
+                    </div>
+                    <div className="col-span-2 mt-2 bg-[#9e1a22]/5 p-2 rounded border border-[#9e1a22]/20">
+                      <p className="text-[9px] text-[#9e1a22] uppercase font-bold mb-1">Emergency Contact</p>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[14px] text-[#9e1a22] font-bold">{emergencyContact}</span>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Section 2: Residential Address */}
+                <section className="mb-6">
+                  <h3 className="text-[#9e1a22] text-[11px] font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-[#9e1a22] rounded-full"></span>
+                    Residential Address
+                  </h3>
+                  <div className="bg-[#f1f4f2]/60 p-2 rounded-sm border-l-4 border-[#9e1a22]/30 mx-1">
+                    <p className="text-[14px] text-[#4c616c] leading-relaxed line-clamp-2">
+                      {address}
+                    </p>
+                  </div>
+                </section>
+
+                {/* Section 3: Institute Support */}
+                <section className="mb-6">
+                  <h3 className="text-[#9e1a22] text-[11px] font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-[#9e1a22] rounded-full"></span>
+                    Institute Support
+                  </h3>
+                  <div className="space-y-1 bg-[#f1f4f2]/40 p-2 rounded-sm mx-1">
+                    <div className="flex items-center gap-2 text-[#181c1b]">
+                      <span className="text-[12px]">📞</span>
+                      <span className="text-[13px]">+91 800 DRONECO</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[#181c1b]">
+                      <span className="text-[12px]">✉️</span>
+                      <span className="text-[13px]">info@dronecoinstitute.com</span>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Barcode/Serial Area */}
+                <div className="mt-auto mb-4">
+                  <div className="flex items-center justify-between mb-1 px-1">
+                    <span className="text-[10px] text-[#6e7976] font-bold uppercase">Serial: DRN-{joinDate}-{displayId}</span>
+                    <span className="text-[10px] text-[#004f45] uppercase font-bold">Valid: JUNE {validTill}</span>
+                  </div>
+                  <div className="bg-white h-12 w-full flex items-center justify-center border border-[#bec9c5]/30 rounded-sm p-2 overflow-hidden">
+                    <QRCodeSVG value={"DRN-" + joinDate + "-" + displayId} size={40} className="mr-4" />
+                    <div className="flex-1 h-full opacity-70 grayscale bg-[repeating-linear-gradient(90deg,transparent,transparent_2px,#000_2px,#000_4px)]"></div>
+                  </div>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4 bg-gray-50 -mx-5 px-5 -mb-5 pb-5">
-                  <p className="font-bold text-red-600 mb-2">Valid Till: July {validTill}</p>
-                  <ul className="text-[10px] text-gray-600 list-disc pl-3 space-y-1">
-                    <li>Carry this card at all times</li>
-                    <li>This card is non-transferable</li>
-                    <li>Report loss immediately to admin</li>
-                    <li>Misuse of card is punishable</li>
-                  </ul>
+                {/* Rules & Disclaimer */}
+                <section className="text-[9px] text-[#4c616c] leading-normal space-y-1 opacity-90 mb-4 border-t border-[#bec9c5]/30 pt-4">
+                  <p><strong className="text-[#181c1b]">Conditions:</strong> This card is non-transferable and remains property of Droneco Institute. Present on demand to authorities.</p>
+                  <p className="italic">If found, please return to any postal drop box or nearest Droneco Administrative Office.</p>
+                </section>
+
+                {/* Footer Branding */}
+                <div className="flex items-center justify-between border-t border-[#9e1a22]/20 pt-4 mt-auto">
+                  <div className="flex flex-col">
+                    <p className="text-[10px] text-[#004f45] font-bold uppercase">DRONECO INSTITUTE</p>
+                    <p className="font-mono text-[8px] text-[#6e7976] uppercase tracking-wider">Certified Technology Board</p>
+                  </div>
                 </div>
               </div>
             </div>

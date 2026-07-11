@@ -1,10 +1,13 @@
 import React from 'react';
 
+import CustomFieldsRenderer from './CustomFieldsRenderer';
+
 const StepAcademic = ({
   formData,
   handleNestedChange,
   prevStep,
-  nextStep
+  nextStep,
+  formConfig
 }) => {
   return (
     <div className="animate-fade-in">
@@ -12,9 +15,10 @@ const StepAcademic = ({
         Academic Details
       </h2>
 
+      {formConfig?.qualification?.visible !== false && (
       <div style={{ borderBottom: '1px solid hsl(var(--border))', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '0.85rem', color: 'var(--accent-hex)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', fontWeight: 600 }}>
-          Previous Qualification
+          Previous Qualification {formConfig?.qualification?.required ? '*' : ''}
         </h3>
 
         <div className="form-group">
@@ -27,7 +31,7 @@ const StepAcademic = ({
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">Board / University</label>
             <input
@@ -48,7 +52,7 @@ const StepAcademic = ({
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">Percentage / CGPA</label>
             <input
@@ -69,13 +73,14 @@ const StepAcademic = ({
           </div>
         </div>
       </div>
+      )}
 
       <div style={{ borderBottom: '1px solid hsl(var(--border))', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '0.85rem', color: 'var(--accent-hex)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', fontWeight: 600 }}>
           10th Details
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">Board</label>
             <input
@@ -111,7 +116,7 @@ const StepAcademic = ({
           12th Details
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">Board</label>
             <input
@@ -141,6 +146,13 @@ const StepAcademic = ({
           </div>
         </div>
       </div>
+
+      <CustomFieldsRenderer
+        stepName="Academic"
+        formConfig={formConfig}
+        formData={formData}
+        handleBasicChange={(e) => handleNestedChange('customFields', e.target.name, e.target.value)}
+      />
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button className="btn btn-secondary" onClick={prevStep}>&larr; Back</button>

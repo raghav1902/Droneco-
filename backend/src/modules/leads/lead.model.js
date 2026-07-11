@@ -9,15 +9,15 @@ const LeadSchema = new mongoose.Schema({
   },
   full_name: { type: String, required: true },
   middle_name: { type: String },
-  last_name: { type: String, required: true },
-  gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
-  dob: { type: Date, required: true },
+  last_name: { type: String },
+  gender: { type: String, enum: ['Male', 'Female', 'Other'] },
+  dob: { type: Date },
   blood_group: { type: String },
-  category: { type: String, required: true, enum: ['General', 'OBC', 'SC', 'ST', 'EWS', 'Other'] },
-  nationality: { type: String, required: true },
+  category: { type: String, enum: ['General', 'OBC', 'SC', 'ST', 'EWS', 'Other'] },
+  nationality: { type: String },
   aadhaar_number: { type: String },
-  email: { type: String, required: true },
-  mobile_number: { type: String, required: true },
+  email: { type: String, required: false },
+  mobile_number: { type: String, required: false },
   city: { type: String, required: true }, // Not explicitly mentioned, but keeping for compatibility
   
   // --- Personal Information ---
@@ -28,8 +28,8 @@ const LeadSchema = new mongoose.Schema({
   disability_description: { type: String },
   
   // --- Media Information ---
-  photo_url: { type: String, required: true },
-  signature_url: { type: String, required: true },
+  photo_url: { type: String, required: false },
+  signature_url: { type: String, required: false },
   
   // --- Communication Information ---
   preferred_language: { type: String },
@@ -60,7 +60,10 @@ const LeadSchema = new mongoose.Schema({
   // --- Step 2: Course Info (Combined) ---
   qualification: { type: String },
   currentClass: { type: String },
-  interested_course_id: { type: String },
+  interested_course_id: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Course' 
+  },
   interestedCourse: { type: String },
   interestedSubject: { type: String },
   preferredBatch: { type: String },
@@ -71,22 +74,22 @@ const LeadSchema = new mongoose.Schema({
 
   // --- Parent / Guardian Details ---
   father: {
-    first_name: { type: String, required: true },
+    first_name: { type: String },
     middle_name: { type: String },
-    last_name: { type: String, required: true },
-    mobile_number: { type: String, required: true },
+    last_name: { type: String },
+    mobile_number: { type: String },
     alt_mobile_number: { type: String },
     email: { type: String },
-    occupation: { type: String, required: true },
+    occupation: { type: String },
     organization: { type: String },
     annual_income: { type: Number },
     highest_qualification: { type: String }
   },
   mother: {
-    first_name: { type: String, required: true },
+    first_name: { type: String },
     middle_name: { type: String },
-    last_name: { type: String, required: true },
-    mobile_number: { type: String, required: true },
+    last_name: { type: String },
+    mobile_number: { type: String },
     alt_mobile_number: { type: String },
     email: { type: String },
     occupation: { type: String },
@@ -105,9 +108,9 @@ const LeadSchema = new mongoose.Schema({
     address: { type: String }
   },
   emergency_contact: {
-    name: { type: String, required: true },
-    relationship: { type: String, required: true },
-    mobile_number: { type: String, required: true }
+    name: { type: String },
+    relationship: { type: String },
+    mobile_number: { type: String }
   },
 
   // --- Academic Details ---
@@ -130,10 +133,10 @@ const LeadSchema = new mongoose.Schema({
   },
 
   // --- Extended Course Details ---
-  admission_year: { type: String, required: true },
+  admission_year: { type: String },
   department: { type: String },
   branch: { type: String }, // Can be combined with department as per UI
-  semester: { type: String, required: true },
+  semester: { type: String },
   section: { type: String },
   enrollment_number: { type: String }, // Auto Generated
   roll_number: { type: String }, // Auto Generated after approval
@@ -164,7 +167,11 @@ const LeadSchema = new mongoose.Schema({
     default: 'New',
     enum: ['New', 'Contacted', 'Interested', 'Not Interested', 'Enrolled']
   },
-  assigned_to_staff_id: { type: String, default: null },
+  assigned_to_staff_id: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    default: null 
+  },
 
   deleted_at: { type: Date, default: null },
 
@@ -186,9 +193,20 @@ const toTitleCase = (str) => {
 };
 
 LeadSchema.pre('save', function (next) {
-  // Recursively trim string fields
   const deepTrim = (obj) => {
-    for (let key in obj) {
+    if (!obj || typeof obj !== 'object') return;
+    if (obj instanceof Map) {
+      for (const [k, v] of obj) {
+        if (typeof v === 'string') obj.set(k, v.trim());
+      }
+      return;
+    }
+    if (Array.isArray(obj)) {
+      obj.forEach(item => deepTrim(item));
+      return;
+    }
+    for (let key of Object.keys(obj)) {
+      if (key.startsWith('_') || key.startsWith('$')) continue;
       if (typeof obj[key] === 'string') {
         obj[key] = obj[key].trim();
       } else if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -197,7 +215,7 @@ LeadSchema.pre('save', function (next) {
     }
   };
   
-  deepTrim(this);
+  deepTrim(this._doc);
 
   // Auto format names to Title Case
   if (this.full_name) this.full_name = toTitleCase(this.full_name);
@@ -222,13 +240,6 @@ LeadSchema.pre('save', function (next) {
   if (this.identification_mark_1) this.identification_mark_1 = toTitleCase(this.identification_mark_1);
   if (this.identification_mark_2) this.identification_mark_2 = toTitleCase(this.identification_mark_2);
   if (this.preferred_language) this.preferred_language = toTitleCase(this.preferred_language);
-
-  // Auto generate enrollment number if not exists
-  if (!this.enrollment_number && this.status === 'Enrolled') {
-    const year = this.admission_year || new Date().getFullYear();
-    const randomPart = Math.floor(1000 + Math.random() * 9000);
-    this.enrollment_number = `EN-${year}-${randomPart}`.toUpperCase();
-  }
   
   next();
 });

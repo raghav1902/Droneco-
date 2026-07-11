@@ -32,8 +32,8 @@ A comprehensive, full-stack **MERN** (MongoDB, Express, React, Node.js) applicat
 
 ### 2. Lead & Admission Management
 - **Lead Tracking:** Record inquiries, track statuses (New, Contacted, Interested, Enrolled), and maintain follow-up logs.
-- **Admission Wizard:** A step-by-step flow to convert a lead into an enrolled student, capturing personal details, course selection, document uploads, and generating a unique Student ID.
-- **Student Profile:** A 360-degree view of a student's personal details, course enrollment, fee structure, and payment history.
+- **Admission Wizard:** A step-by-step flow to convert a lead into an enrolled student. Automatically populates submitted form data (including dynamic questions) and generates unique `ST-YYYY-XXXX` identifiers and linked `Parent` profiles.
+- **Student Profile & ID:** A comprehensive view of a student's personal details, auto-populated ID Cards, course enrollment, fee structure, and payment history securely tied to the unified Student document.
 
 ### 3. Financial & Fee Management
 - **Fee Structures:** Assign total fees, tax percentages, and installment rules to specific courses.
@@ -45,6 +45,11 @@ A comprehensive, full-stack **MERN** (MongoDB, Express, React, Node.js) applicat
 - **Dashboards:** Real-time metrics tracking Total Collections, Pending Fees, and Lead Conversion Rates.
 - **Charts:** Visual representation of Revenue Trends and Course Popularity using Recharts.
 - **Settings Management:** Globally configure Institute Info (logo/name), Fee defaults (late fees, admission fees), and Receipt prefixes.
+
+### 5. Dynamic Form Builder
+- **Customizable Inquiries:** Admins can dynamically toggle the visibility and required status of native fields (like Category, Address, Guardian Details) on the public inquiry form.
+- **Custom Fields Engine:** Inject bespoke text, number, date, or dropdown fields into specific steps of the form without changing code.
+- **Automated Validation:** The backend automatically maps and enforces validation rules dynamically based on the active form configuration.
 
 ## 🚀 Getting Started
 

@@ -38,16 +38,21 @@ const createPayment = async (req, res) => {
       remarks: remarks || ''
     });
 
-    // Update the parent Fee record's paid amount
-    // The pre('save') hook in Fee.js will automatically recalculate due_amount and status
-    fee.paid_amount = Number(fee.paid_amount || 0) + Number(amount_paid || 0) + Number(discount_applied || 0);
+    // Update the parent Fee record's paid amount and discount
+    fee.paid_amount = Number(fee.paid_amount || 0) + Number(amount_paid || 0);
+    
+    if (discount_applied) {
+      fee.discount_amount = Number(fee.discount_amount || 0) + Number(discount_applied);
+      fee.net_payable = Math.max(0, Number(fee.net_payable || 0) - Number(discount_applied));
+    }
 
     // If there is a late fee, it technically increases the net_payable OR we just treat it as an isolated charge
     // For simplicity, we assume late fees increase the net payable if they are paid right now
     if (late_fee) {
       fee.net_payable = Number(fee.net_payable || 0) + Number(late_fee || 0);
-      fee.due_amount = fee.net_payable - fee.paid_amount;
     }
+    
+    // The pre('save') hook in Fee.js will automatically recalculate due_amount and status
 
     await fee.save();
 

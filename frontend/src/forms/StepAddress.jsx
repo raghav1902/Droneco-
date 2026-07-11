@@ -1,10 +1,13 @@
 import React from 'react';
 
+import CustomFieldsRenderer from './CustomFieldsRenderer';
+
 const StepAddress = ({
   formData,
   handleNestedChange,
   prevStep,
-  nextStep
+  nextStep,
+  formConfig
 }) => {
   return (
     <div className="animate-fade-in">
@@ -12,12 +15,14 @@ const StepAddress = ({
         Address Details
       </h2>
 
+      {formConfig?.address?.visible !== false && (
+      <>
       <div style={{ borderBottom: '1px solid hsl(var(--border))', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '0.85rem', color: 'var(--accent-hex)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', fontWeight: 600 }}>
-          Permanent Address
+          Permanent Address {formConfig?.address?.required ? '*' : ''}
         </h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">House/Flat No.</label>
             <input
@@ -38,7 +43,7 @@ const StepAddress = ({
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-3'>
           <div className="form-group">
             <label className="form-label">City</label>
             <input
@@ -68,7 +73,7 @@ const StepAddress = ({
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div className='form-grid-2'>
           <div className="form-group">
             <label className="form-label">Country</label>
             <input
@@ -115,7 +120,7 @@ const StepAddress = ({
 
         {!formData.current_address.same_as_permanent && (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className='form-grid-2'>
               <div className="form-group">
                 <label className="form-label">House/Flat No.</label>
                 <input
@@ -136,7 +141,7 @@ const StepAddress = ({
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+            <div className='form-grid-3'>
               <div className="form-group">
                 <label className="form-label">City</label>
                 <input
@@ -166,7 +171,7 @@ const StepAddress = ({
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className='form-grid-2'>
               <div className="form-group">
                 <label className="form-label">Country</label>
                 <input
@@ -189,6 +194,14 @@ const StepAddress = ({
           </>
         )}
       </div>
+      </>
+      )}
+
+      {formConfig?.address?.visible === false && (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+          Address details are not required.
+        </div>
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <button className="btn btn-secondary" onClick={prevStep}>&larr; Back</button>

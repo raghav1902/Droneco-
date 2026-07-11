@@ -6,7 +6,7 @@ import { changePasswordSchema, settingsSchema, validateForm } from '../../../uti
 import {
   Building2, Wallet, Receipt, Users, Shield,
   Database, ScrollText, Info, Save, Upload,
-  Download, Plus, Edit2, Trash2, Key
+  Download, Plus, Edit2, Trash2, Key, Settings,
 } from 'lucide-react';
 
 // --- Sub-components for each Settings Section ---
@@ -182,6 +182,149 @@ const ReceiptSettings = ({ settings, setSettings, onSave }) => (
   </div>
 );
 
+const FormConfigSettings = ({ settings, setSettings, onSave }) => {
+  const [newCustomField, setNewCustomField] = useState({ id: '', label: '', type: 'text', options: '', required: false, step: 'Personal' });
+
+  const handleToggleField = (field, key) => {
+    setSettings(s => ({
+      ...s,
+      [field]: { ...s[field], [key]: !s[field]?.[key] }
+    }));
+  };
+
+  const handleAddCustomField = () => {
+    if (!newCustomField.label) return showToast('Label is required', 'error');
+    const id = newCustomField.label.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const optionsArray = newCustomField.options ? newCustomField.options.split(',').map(o => o.trim()) : [];
+    
+    setSettings(s => ({
+      ...s,
+      customFields: [...(s.customFields || []), { ...newCustomField, id, options: optionsArray }]
+    }));
+    
+    setNewCustomField({ id: '', label: '', type: 'text', options: '', required: false, step: 'Personal' });
+    showToast('Custom field added locally. Remember to save changes.', 'success');
+  };
+
+  const handleRemoveCustomField = (index) => {
+    setSettings(s => ({
+      ...s,
+      customFields: s.customFields.filter((_, i) => i !== index)
+    }));
+  };
+
+  const StandardFieldRow = ({ label, fieldKey }) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', borderBottom: '1px solid var(--border)' }}>
+      <span style={{ fontWeight: 500 }}>{label}</span>
+      <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+          <input type="checkbox" checked={settings[fieldKey]?.visible !== false} onChange={() => handleToggleField(fieldKey, 'visible')} /> Visible
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+          <input type="checkbox" checked={settings[fieldKey]?.required !== false} onChange={() => handleToggleField(fieldKey, 'required')} disabled={settings[fieldKey]?.visible === false} /> Required
+        </label>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="animate-fade-in">
+      <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Dynamic Form Configuration</h3>
+      
+      <div className="glass-card" style={{ padding: '2rem', marginBottom: '2rem' }}>
+        <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Standard Fields</h4>
+        <div style={{ background: 'var(--bg-tertiary)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+          <StandardFieldRow label="Guardian Details (Student Form)" fieldKey="guardian" />
+          <StandardFieldRow label="Address Details" fieldKey="address" />
+          <StandardFieldRow label="Photo & Signature" fieldKey="media" />
+          <StandardFieldRow label="Category" fieldKey="category" />
+          <StandardFieldRow label="Blood Group" fieldKey="blood_group" />
+          <StandardFieldRow label="Religion" fieldKey="religion" />
+          <StandardFieldRow label="Marital Status" fieldKey="marital_status" />
+          <StandardFieldRow label="Identification Marks" fieldKey="identification_marks" />
+          <StandardFieldRow label="Disability Details" fieldKey="disability" />
+          <StandardFieldRow label="Previous Qualification" fieldKey="qualification" />
+        </div>
+      </div>
+
+      <div className="glass-card" style={{ padding: '2rem', marginBottom: '2rem' }}>
+        <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Add Custom Field</h4>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          <div className="form-group">
+            <label className="form-label">Field Label</label>
+            <input type="text" className="form-input" value={newCustomField.label} onChange={e => setNewCustomField({ ...newCustomField, label: e.target.value })} placeholder="e.g. T-Shirt Size" />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Field Type</label>
+            <select className="form-select" value={newCustomField.type} onChange={e => setNewCustomField({ ...newCustomField, type: e.target.value })}>
+              <option value="text">Text Input</option>
+              <option value="number">Number Input</option>
+              <option value="date">Date Picker</option>
+              <option value="dropdown">Dropdown Options</option>
+            </select>
+          </div>
+          {newCustomField.type === 'dropdown' && (
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">Dropdown Options (Comma separated)</label>
+              <input type="text" className="form-input" value={newCustomField.options} onChange={e => setNewCustomField({ ...newCustomField, options: e.target.value })} placeholder="Small, Medium, Large" />
+            </div>
+          )}
+          <div className="form-group">
+            <label className="form-label">Display Step</label>
+            <select className="form-select" value={newCustomField.step} onChange={e => setNewCustomField({ ...newCustomField, step: e.target.value })}>
+              <option value="Personal">Personal Details</option>
+              <option value="Academic">Academic Details</option>
+              <option value="Course">Course Details</option>
+            </select>
+          </div>
+          <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '0.5rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input type="checkbox" checked={newCustomField.required} onChange={e => setNewCustomField({ ...newCustomField, required: e.target.checked })} /> Is Required?
+            </label>
+          </div>
+        </div>
+        <button className="btn btn-secondary" style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={handleAddCustomField}>
+          <Plus size={16} /> Add Custom Field
+        </button>
+      </div>
+
+      {(settings.customFields?.length > 0) && (
+        <div className="glass-card" style={{ padding: '2rem', marginBottom: '2rem' }}>
+          <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Configured Custom Fields</h4>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                <th style={{ padding: '0.5rem' }}>Label</th>
+                <th style={{ padding: '0.5rem' }}>Type</th>
+                <th style={{ padding: '0.5rem' }}>Step</th>
+                <th style={{ padding: '0.5rem' }}>Required</th>
+                <th style={{ padding: '0.5rem' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {settings.customFields.map((field, index) => (
+                <tr key={index} style={{ borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '0.5rem' }}>{field.label}</td>
+                  <td style={{ padding: '0.5rem', textTransform: 'capitalize' }}>{field.type}</td>
+                  <td style={{ padding: '0.5rem' }}>{field.step}</td>
+                  <td style={{ padding: '0.5rem' }}>{field.required ? 'Yes' : 'No'}</td>
+                  <td style={{ padding: '0.5rem' }}>
+                    <button className="btn btn-secondary" style={{ padding: '0.3rem', color: 'var(--danger)' }} onClick={() => handleRemoveCustomField(index)}><Trash2 size={14} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => onSave({ formConfig: settings })}>
+        <Save size={16} /> Save Configuration
+      </button>
+    </div>
+  );
+};
+
 const UserManagement = () => (
   <div className="animate-fade-in">
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -237,7 +380,7 @@ const SecuritySettings = () => {
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
-    const validation = validateForm(changePasswordSchema, { oldPassword: currentPassword, newPassword });
+    const validation = validateForm(changePasswordSchema, { currentPassword, newPassword });
     if (!validation.success) {
       const msgs = Object.values(validation.errors).join(', ');
       return showToast(msgs, 'error');
@@ -419,6 +562,7 @@ const AdminSettings = () => {
   const [instituteSettings, setInstituteSettings] = useState({});
   const [feeSettings, setFeeSettings] = useState({});
   const [receiptSettings, setReceiptSettings] = useState({});
+  const [formConfigSettings, setFormConfigSettings] = useState({});
   const [loadingSettings, setLoadingSettings] = useState(true);
 
   const fetchSettings = async () => {
@@ -428,6 +572,7 @@ const AdminSettings = () => {
         setInstituteSettings(response.data.data.institute || {});
         setFeeSettings(response.data.data.fee || {});
         setReceiptSettings(response.data.data.receipt || {});
+        setFormConfigSettings(response.data.data.formConfig || {});
       }
     } catch (error) {
       console.error('Error loading settings', error);
@@ -465,6 +610,7 @@ const AdminSettings = () => {
     { id: 'institute', label: 'Institute Settings', icon: Building2 },
     { id: 'fee', label: 'Fee Settings', icon: Wallet },
     { id: 'receipt', label: 'Receipt Settings', icon: Receipt },
+    { id: 'form', label: 'Form Config', icon: Settings },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'security', label: 'Security', icon: Shield },
     { id: 'backup', label: 'Backup & Restore', icon: Database },
@@ -481,6 +627,7 @@ const AdminSettings = () => {
       case 'institute': return <InstituteSettings settings={instituteSettings} setSettings={setInstituteSettings} onSave={handleSaveSettings} />;
       case 'fee': return <FeeSettings settings={feeSettings} setSettings={setFeeSettings} onSave={handleSaveSettings} />;
       case 'receipt': return <ReceiptSettings settings={receiptSettings} setSettings={setReceiptSettings} onSave={handleSaveSettings} />;
+      case 'form': return <FormConfigSettings settings={formConfigSettings} setSettings={setFormConfigSettings} onSave={handleSaveSettings} />;
       case 'users': return <UserManagement />;
       case 'security': return <SecuritySettings />;
       case 'backup': return <BackupRestore />;

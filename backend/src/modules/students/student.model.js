@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const StudentSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Optional: If student has a login
   student_id: { type: String, unique: true }, // Internal ID
-  enrollment_number: { type: String, unique: true }, // Auto-generated ID (EN-YYYY-XXXX)
+  enrollment_number: { type: String }, // Auto-generated ID (EN-YYYY-XXXX)
   roll_number: { type: String },
   
   // Basic Info
@@ -126,9 +126,20 @@ const toTitleCase = (str) => {
 };
 
 StudentSchema.pre('save', async function (next) {
-  // Recursively trim string fields
   const deepTrim = (obj) => {
-    for (let key in obj) {
+    if (!obj || typeof obj !== 'object') return;
+    if (obj instanceof Map) {
+      for (const [k, v] of obj) {
+        if (typeof v === 'string') obj.set(k, v.trim());
+      }
+      return;
+    }
+    if (Array.isArray(obj)) {
+      obj.forEach(item => deepTrim(item));
+      return;
+    }
+    for (let key of Object.keys(obj)) {
+      if (key.startsWith('_') || key.startsWith('$')) continue;
       if (typeof obj[key] === 'string') {
         obj[key] = obj[key].trim();
       } else if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -136,7 +147,8 @@ StudentSchema.pre('save', async function (next) {
       }
     }
   };
-  deepTrim(this);
+  
+  deepTrim(this._doc);
 
   // Auto format names to Title Case
   if (this.personal_info) {

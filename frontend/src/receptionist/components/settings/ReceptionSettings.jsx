@@ -102,7 +102,7 @@ const AccountSettings = () => {
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
-    const validation = validateForm(changePasswordSchema, { oldPassword: currentPassword, newPassword });
+    const validation = validateForm(changePasswordSchema, { currentPassword, newPassword });
     if (!validation.success) {
       const msgs = Object.values(validation.errors).join(', ');
       return showToast(msgs, 'error');
