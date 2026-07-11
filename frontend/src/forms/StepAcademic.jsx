@@ -22,7 +22,7 @@ const StepAcademic = ({
         </h3>
 
         <div className="form-group">
-          <label className="form-label">School / College Name</label>
+          <label className="form-label">School / College Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <input
             type="text"
             className="form-input"
@@ -33,7 +33,7 @@ const StepAcademic = ({
 
         <div className='form-grid-2'>
           <div className="form-group">
-            <label className="form-label">Board / University</label>
+            <label className="form-label">Board / University <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -42,7 +42,7 @@ const StepAcademic = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Passing Year</label>
+            <label className="form-label">Passing Year <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -54,7 +54,7 @@ const StepAcademic = ({
 
         <div className='form-grid-2'>
           <div className="form-group">
-            <label className="form-label">Percentage / CGPA</label>
+            <label className="form-label">Percentage / CGPA <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -63,7 +63,7 @@ const StepAcademic = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Roll Number</label>
+            <label className="form-label">Roll Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -82,7 +82,7 @@ const StepAcademic = ({
 
         <div className='form-grid-3'>
           <div className="form-group">
-            <label className="form-label">Board</label>
+            <label className="form-label">Board <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -91,7 +91,7 @@ const StepAcademic = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Percentage</label>
+            <label className="form-label">Percentage <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -100,7 +100,7 @@ const StepAcademic = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Passing Year</label>
+            <label className="form-label">Passing Year <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -118,7 +118,7 @@ const StepAcademic = ({
 
         <div className='form-grid-3'>
           <div className="form-group">
-            <label className="form-label">Board</label>
+            <label className="form-label">Board <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -127,7 +127,7 @@ const StepAcademic = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Percentage</label>
+            <label className="form-label">Percentage <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -136,7 +136,7 @@ const StepAcademic = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Passing Year</label>
+            <label className="form-label">Passing Year <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"

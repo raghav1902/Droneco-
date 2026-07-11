@@ -8,7 +8,7 @@ const Step3 = ({ formData, handleFeedbackChange, prevStep, nextStep }) => {
       </h2>
 
       <div className="form-group">
-        <label className="form-label">How did you hear about us?</label>
+        <label className="form-label">How did you hear about us? <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
         <select
           className="form-select"
           value={formData.feedback.source}
@@ -24,7 +24,7 @@ const Step3 = ({ formData, handleFeedbackChange, prevStep, nextStep }) => {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Rate your registration experience</label>
+        <label className="form-label">Rate your registration experience <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
         <div style={{ display: 'flex', gap: '0.5rem', margin: '0.5rem 0' }}>
           {[1, 2, 3, 4, 5].map(star => (
             <button

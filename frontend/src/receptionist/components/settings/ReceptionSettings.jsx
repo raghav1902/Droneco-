@@ -53,7 +53,7 @@ const ProfileSettings = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', maxWidth: '500px' }}>
 
           <div className="form-group">
-            <label className="form-label">Profile Picture</label>
+            <label className="form-label">Profile Picture <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ width: '80px', height: '80px', background: 'var(--bg-tertiary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 {profilePhoto ? (
@@ -70,18 +70,18 @@ const ProfileSettings = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Full Name</label>
+            <label className="form-label">Full Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="text" className="form-input" value={name} onChange={e => setName(e.target.value)} />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email Address <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="email" className="form-input" value={user?.email || ""} disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Contact admin to change email address.</p>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Phone Number</label>
+            <label className="form-label">Phone Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="text" className="form-input" value={phone} onChange={e => setPhone(e.target.value)} />
           </div>
 
@@ -140,15 +140,15 @@ const AccountSettings = () => {
         <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Change Password</h4>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', maxWidth: '400px' }}>
           <div className="form-group">
-            <label className="form-label">Current Password</label>
+            <label className="form-label">Current Password <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="password" className="form-input" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">New Password</label>
+            <label className="form-label">New Password <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="password" className="form-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">Confirm New Password</label>
+            <label className="form-label">Confirm New Password <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="password" className="form-input" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
           </div>
           <button className="btn btn-primary" style={{ marginTop: '0.5rem' }} onClick={handleUpdatePassword} disabled={loading}>

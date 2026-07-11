@@ -26,7 +26,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             {getError('father', 'first_name') && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{getError('father', 'first_name')}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Middle Name</label>
+            <label className="form-label">Middle Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -58,7 +58,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             {getError('father', 'mobile_number') && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{getError('father', 'mobile_number')}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Alternate Mobile Number</label>
+            <label className="form-label">Alternate Mobile Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="tel"
               className="form-input"
@@ -67,7 +67,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email Address <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="email"
               className="form-input"
@@ -96,7 +96,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             {getError('father', 'occupation') && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{getError('father', 'occupation')}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Organization / Company Name</label>
+            <label className="form-label">Organization / Company Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -108,7 +108,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
 
         <div className='form-grid-2'>
           <div className="form-group">
-            <label className="form-label">Annual Income (₹)</label>
+            <label className="form-label">Annual Income (₹) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="number"
               className="form-input"
@@ -118,7 +118,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             {getError('father', 'annual_income') && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{getError('father', 'annual_income')}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Highest Qualification</label>
+            <label className="form-label">Highest Qualification <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <select
               className="form-select"
               value={formData.father.highest_qualification}
@@ -152,7 +152,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             {getError('mother', 'first_name') && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{getError('mother', 'first_name')}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Middle Name</label>
+            <label className="form-label">Middle Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -184,7 +184,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             {getError('mother', 'mobile_number') && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{getError('mother', 'mobile_number')}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Alternate Mobile Number</label>
+            <label className="form-label">Alternate Mobile Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="tel"
               className="form-input"
@@ -193,7 +193,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email Address <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="email"
               className="form-input"
@@ -206,7 +206,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
 
         <div className='form-grid-2'>
           <div className="form-group">
-            <label className="form-label">Occupation</label>
+            <label className="form-label">Occupation <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <select
               className="form-select"
               value={formData.mother.occupation}
@@ -222,7 +222,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">Organization / Company Name</label>
+            <label className="form-label">Organization / Company Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -234,7 +234,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
 
         <div className='form-grid-2'>
           <div className="form-group">
-            <label className="form-label">Annual Income (₹)</label>
+            <label className="form-label">Annual Income (₹) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="number"
               className="form-input"
@@ -244,7 +244,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             {getError('mother', 'annual_income') && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{getError('mother', 'annual_income')}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Highest Qualification</label>
+            <label className="form-label">Highest Qualification <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <select
               className="form-select"
               value={formData.mother.highest_qualification}
@@ -270,7 +270,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
         
         <div className='form-grid-3'>
           <div className="form-group">
-            <label className="form-label">First Name</label>
+            <label className="form-label">First Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -279,7 +279,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Middle Name</label>
+            <label className="form-label">Middle Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -288,7 +288,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Last Name</label>
+            <label className="form-label">Last Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -300,7 +300,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
 
         <div className='form-grid-3'>
           <div className="form-group">
-            <label className="form-label">Relationship with Student</label>
+            <label className="form-label">Relationship with Student <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <select
               className="form-select"
               value={formData.guardian.relationship}
@@ -317,7 +317,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             </select>
           </div>
           <div className="form-group">
-            <label className="form-label">Mobile Number</label>
+            <label className="form-label">Mobile Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="tel"
               className="form-input"
@@ -327,7 +327,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             {getError('guardian', 'mobile_number') && <span style={{ color: 'var(--danger)', fontSize: '0.8rem' }}>{getError('guardian', 'mobile_number')}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email Address <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="email"
               className="form-input"
@@ -340,7 +340,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
 
         <div className='form-grid-1-2'>
           <div className="form-group">
-            <label className="form-label">Occupation</label>
+            <label className="form-label">Occupation <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -349,7 +349,7 @@ const StepParentGuardian = ({ formData, handleNestedChange, validationErrors, pr
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Address</label>
+            <label className="form-label">Address <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"

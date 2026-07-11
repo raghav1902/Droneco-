@@ -42,7 +42,7 @@ const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep, formCon
               />
             </div>
             <div className="form-group">
-              <label className="form-label">Identification Mark 2</label>
+              <label className="form-label">Identification Mark 2 <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="text"
                 name="identification_mark_2"
@@ -69,7 +69,7 @@ const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep, formCon
               </select>
             </div>
             <div className="form-group">
-              <label className="form-label">Disability Description (If applicable)</label>
+              <label className="form-label">Disability Description (If applicable) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="text"
                 name="disability_description"
@@ -90,7 +90,7 @@ const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep, formCon
 
         <div className='form-grid-2'>
           <div className="form-group">
-            <label className="form-label">Preferred Language</label>
+            <label className="form-label">Preferred Language <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               name="preferred_language"
@@ -101,7 +101,7 @@ const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep, formCon
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Alternate Mobile Number</label>
+            <label className="form-label">Alternate Mobile Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="tel"
               name="alternate_mobile"

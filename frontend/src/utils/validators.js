@@ -25,6 +25,20 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(6, "New password must be at least 6 characters")
 });
 
+export const createUserSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format").min(1, "Email is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  roleName: z.enum(['Admin', 'Receptionist', 'Counselor'], { errorMap: () => ({ message: "Role is required" }) })
+});
+
+export const editUserSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format").min(1, "Email is required"),
+  roleName: z.enum(['Admin', 'Receptionist', 'Counselor'], { errorMap: () => ({ message: "Role is required" }) }),
+  status: z.enum(['active', 'inactive'])
+});
+
 export const createLeadSchema = z.object({
   full_name: z.string().optional(),
   email: z.string().optional(),

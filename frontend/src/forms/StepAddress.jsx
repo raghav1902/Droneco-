@@ -24,7 +24,7 @@ const StepAddress = ({
 
         <div className='form-grid-2'>
           <div className="form-group">
-            <label className="form-label">House/Flat No.</label>
+            <label className="form-label">House/Flat No. <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -33,7 +33,7 @@ const StepAddress = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Street/Locality</label>
+            <label className="form-label">Street/Locality <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -45,7 +45,7 @@ const StepAddress = ({
 
         <div className='form-grid-3'>
           <div className="form-group">
-            <label className="form-label">City</label>
+            <label className="form-label">City <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -54,7 +54,7 @@ const StepAddress = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">District</label>
+            <label className="form-label">District <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -63,7 +63,7 @@ const StepAddress = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">State</label>
+            <label className="form-label">State <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -75,7 +75,7 @@ const StepAddress = ({
 
         <div className='form-grid-2'>
           <div className="form-group">
-            <label className="form-label">Country</label>
+            <label className="form-label">Country <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -84,7 +84,7 @@ const StepAddress = ({
             />
           </div>
           <div className="form-group">
-            <label className="form-label">PIN Code</label>
+            <label className="form-label">PIN Code <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input
               type="text"
               className="form-input"
@@ -122,7 +122,7 @@ const StepAddress = ({
           <>
             <div className='form-grid-2'>
               <div className="form-group">
-                <label className="form-label">House/Flat No.</label>
+                <label className="form-label">House/Flat No. <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                 <input
                   type="text"
                   className="form-input"
@@ -131,7 +131,7 @@ const StepAddress = ({
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">Street/Locality</label>
+                <label className="form-label">Street/Locality <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                 <input
                   type="text"
                   className="form-input"
@@ -143,7 +143,7 @@ const StepAddress = ({
 
             <div className='form-grid-3'>
               <div className="form-group">
-                <label className="form-label">City</label>
+                <label className="form-label">City <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                 <input
                   type="text"
                   className="form-input"
@@ -152,7 +152,7 @@ const StepAddress = ({
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">District</label>
+                <label className="form-label">District <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                 <input
                   type="text"
                   className="form-input"
@@ -161,7 +161,7 @@ const StepAddress = ({
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">State</label>
+                <label className="form-label">State <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                 <input
                   type="text"
                   className="form-input"
@@ -173,7 +173,7 @@ const StepAddress = ({
 
             <div className='form-grid-2'>
               <div className="form-group">
-                <label className="form-label">Country</label>
+                <label className="form-label">Country <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                 <input
                   type="text"
                   className="form-input"
@@ -182,7 +182,7 @@ const StepAddress = ({
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">PIN Code</label>
+                <label className="form-label">PIN Code <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                 <input
                   type="text"
                   className="form-input"

@@ -48,7 +48,7 @@ const StepCourse = ({
           </select>
         </div>
         <div className="form-group">
-          <label className="form-label">Mode of Admission</label>
+          <label className="form-label">Mode of Admission <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <input
             type="text"
             name="mode_of_admission"
@@ -79,7 +79,7 @@ const StepCourse = ({
           </select>
         </div>
         <div className="form-group">
-          <label className="form-label">Branch</label>
+          <label className="form-label">Branch <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <input
             type="text"
             name="branch"
@@ -113,7 +113,7 @@ const StepCourse = ({
           </select>
         </div>
         <div className="form-group">
-          <label className="form-label">Section</label>
+          <label className="form-label">Section <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <input
             type="text"
             name="section"
@@ -127,7 +127,7 @@ const StepCourse = ({
 
       <div className='form-grid-2'>
         <div className="form-group">
-          <label className="form-label">Enrollment Number</label>
+          <label className="form-label">Enrollment Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <input
             type="text"
             name="enrollment_number"
@@ -139,7 +139,7 @@ const StepCourse = ({
           />
         </div>
         <div className="form-group">
-          <label className="form-label">Roll Number</label>
+          <label className="form-label">Roll Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <input
             type="text"
             name="roll_number"

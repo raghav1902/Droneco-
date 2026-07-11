@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { showToast } from '../../../utils/toast.js';
 import API from '../../../api/api.js';
-import { changePasswordSchema, settingsSchema, validateForm } from '../../../utils/validators.js';
+import { changePasswordSchema, settingsSchema, validateForm, createUserSchema, editUserSchema } from '../../../utils/validators.js';
+import { AuthContext } from '../../../context/AuthContext.jsx';
 
 import {
   Building2, Wallet, Receipt, Users, Shield,
@@ -29,11 +30,11 @@ const InstituteSettings = ({ settings, setSettings, onSave }) => {
       <div className="glass-card" style={{ padding: '2rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">Institute Name</label>
+            <label className="form-label">Institute Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="text" className="form-input" value={settings.name || ''} onChange={e => setSettings(s => ({ ...s, name: e.target.value }))} />
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">Logo Upload</label>
+            <label className="form-label">Logo Upload <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ width: '80px', height: '80px', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 {settings.logo ? <img src={settings.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>No Logo</span>}
@@ -45,23 +46,23 @@ const InstituteSettings = ({ settings, setSettings, onSave }) => {
             </div>
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">Address</label>
+            <label className="form-label">Address <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <textarea className="form-textarea" rows="2" value={settings.address || ''} onChange={e => setSettings(s => ({ ...s, address: e.target.value }))}></textarea>
           </div>
           <div className="form-group">
-            <label className="form-label">Contact Number</label>
+            <label className="form-label">Contact Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="text" className="form-input" value={settings.contact || ''} onChange={e => setSettings(s => ({ ...s, contact: e.target.value }))} />
           </div>
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">Email <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="email" className="form-input" value={settings.email || ''} onChange={e => setSettings(s => ({ ...s, email: e.target.value }))} />
           </div>
           <div className="form-group">
-            <label className="form-label">Website</label>
+            <label className="form-label">Website <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="url" className="form-input" value={settings.website || ''} onChange={e => setSettings(s => ({ ...s, website: e.target.value }))} />
           </div>
           <div className="form-group">
-            <label className="form-label">Time Zone</label>
+            <label className="form-label">Time Zone <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <select className="form-select" value={settings.timezone || ''} onChange={e => setSettings(s => ({ ...s, timezone: e.target.value }))}>
               <option value="UTC (GMT+0)">UTC (GMT+0)</option>
               <option value="EST (GMT-5)">EST (GMT-5)</option>
@@ -69,7 +70,7 @@ const InstituteSettings = ({ settings, setSettings, onSave }) => {
             </select>
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">Currency</label>
+            <label className="form-label">Currency <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <select className="form-select" style={{ maxWidth: '200px' }} value={settings.currency || ''} onChange={e => setSettings(s => ({ ...s, currency: e.target.value }))}>
               <option value="INR">Indian Rupee (₹)</option>
               <option value="USD">US Dollar ($)</option>
@@ -91,7 +92,7 @@ const FeeSettings = ({ settings, setSettings, onSave }) => (
     <div className="glass-card" style={{ padding: '2rem' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
         <div className="form-group">
-          <label className="form-label">Default Due Date</label>
+          <label className="form-label">Default Due Date <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <select className="form-select" value={settings.defaultDueDate || ''} onChange={e => setSettings(s => ({ ...s, defaultDueDate: e.target.value }))}>
             <option>5th of every month</option>
             <option>10th of every month</option>
@@ -99,11 +100,11 @@ const FeeSettings = ({ settings, setSettings, onSave }) => (
           </select>
         </div>
         <div className="form-group">
-          <label className="form-label">Grace Period (Days)</label>
+          <label className="form-label">Grace Period (Days) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <input type="number" className="form-input" value={settings.gracePeriodDays || 0} onChange={e => setSettings(s => ({ ...s, gracePeriodDays: parseInt(e.target.value) || 0 }))} />
         </div>
         <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-          <label className="form-label">Late Fee</label>
+          <label className="form-label">Late Fee <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <input type="number" className="form-input" value={settings.lateFeeAmount || 0} onChange={e => setSettings(s => ({ ...s, lateFeeAmount: parseInt(e.target.value) || 0 }))} placeholder="Amount" style={{ width: '150px' }} />
             <select className="form-select" style={{ width: '150px' }} value={settings.lateFeeType || ''} onChange={e => setSettings(s => ({ ...s, lateFeeType: e.target.value }))}>
@@ -114,21 +115,21 @@ const FeeSettings = ({ settings, setSettings, onSave }) => (
           </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Allow Partial Payments</label>
+          <label className="form-label">Allow Partial Payments <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="partial" checked={settings.allowPartialPayments === true} onChange={() => setSettings(s => ({ ...s, allowPartialPayments: true }))} /> On</label>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="partial" checked={settings.allowPartialPayments === false} onChange={() => setSettings(s => ({ ...s, allowPartialPayments: false }))} /> Off</label>
           </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Allow Installments</label>
+          <label className="form-label">Allow Installments <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="installments" checked={settings.allowInstallments === true} onChange={() => setSettings(s => ({ ...s, allowInstallments: true }))} /> On</label>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="installments" checked={settings.allowInstallments === false} onChange={() => setSettings(s => ({ ...s, allowInstallments: false }))} /> Off</label>
           </div>
         </div>
         <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-          <label className="form-label">Tax Percentage (%)</label>
+          <label className="form-label">Tax Percentage (%) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <input type="number" className="form-input" value={settings.taxPercentage || 0} onChange={e => setSettings(s => ({ ...s, taxPercentage: parseInt(e.target.value) || 0 }))} style={{ maxWidth: '200px' }} />
         </div>
       </div>
@@ -145,20 +146,20 @@ const ReceiptSettings = ({ settings, setSettings, onSave }) => (
     <div className="glass-card" style={{ padding: '2rem' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
         <div className="form-group">
-          <label className="form-label">Receipt Header</label>
+          <label className="form-label">Receipt Header <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <textarea className="form-textarea" rows="2" value={settings.header || ''} onChange={e => setSettings(s => ({ ...s, header: e.target.value }))}></textarea>
         </div>
         <div className="form-group">
-          <label className="form-label">Footer Message</label>
+          <label className="form-label">Footer Message <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <textarea className="form-textarea" rows="2" value={settings.footerMessage || ''} onChange={e => setSettings(s => ({ ...s, footerMessage: e.target.value }))}></textarea>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
           <div className="form-group">
-            <label className="form-label">Receipt Prefix</label>
+            <label className="form-label">Receipt Prefix <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="text" className="form-input" value={settings.prefix || ''} onChange={e => setSettings(s => ({ ...s, prefix: e.target.value }))} />
           </div>
           <div className="form-group">
-            <label className="form-label">Auto Receipt Numbering</label>
+            <label className="form-label">Auto Receipt Numbering <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="auto_num" checked={settings.autoNumbering === true} onChange={() => setSettings(s => ({ ...s, autoNumbering: true }))} /> On</label>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="auto_num" checked={settings.autoNumbering === false} onChange={() => setSettings(s => ({ ...s, autoNumbering: false }))} /> Off</label>
@@ -166,7 +167,7 @@ const ReceiptSettings = ({ settings, setSettings, onSave }) => (
           </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Show Logo on Receipt</label>
+          <label className="form-label">Show Logo on Receipt <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="show_logo" checked={settings.showLogo === true} onChange={() => setSettings(s => ({ ...s, showLogo: true }))} /> Yes</label>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="show_logo" checked={settings.showLogo === false} onChange={() => setSettings(s => ({ ...s, showLogo: false }))} /> No</label>
@@ -251,11 +252,11 @@ const FormConfigSettings = ({ settings, setSettings, onSave }) => {
         <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Add Custom Field</h4>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
           <div className="form-group">
-            <label className="form-label">Field Label</label>
+            <label className="form-label">Field Label <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="text" className="form-input" value={newCustomField.label} onChange={e => setNewCustomField({ ...newCustomField, label: e.target.value })} placeholder="e.g. T-Shirt Size" />
           </div>
           <div className="form-group">
-            <label className="form-label">Field Type</label>
+            <label className="form-label">Field Type <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <select className="form-select" value={newCustomField.type} onChange={e => setNewCustomField({ ...newCustomField, type: e.target.value })}>
               <option value="text">Text Input</option>
               <option value="number">Number Input</option>
@@ -265,12 +266,12 @@ const FormConfigSettings = ({ settings, setSettings, onSave }) => {
           </div>
           {newCustomField.type === 'dropdown' && (
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Dropdown Options (Comma separated)</label>
+              <label className="form-label">Dropdown Options (Comma separated) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
               <input type="text" className="form-input" value={newCustomField.options} onChange={e => setNewCustomField({ ...newCustomField, options: e.target.value })} placeholder="Small, Medium, Large" />
             </div>
           )}
           <div className="form-group">
-            <label className="form-label">Display Step</label>
+            <label className="form-label">Display Step <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <select className="form-select" value={newCustomField.step} onChange={e => setNewCustomField({ ...newCustomField, step: e.target.value })}>
               <option value="Personal">Personal Details</option>
               <option value="Academic">Academic Details</option>
@@ -325,52 +326,238 @@ const FormConfigSettings = ({ settings, setSettings, onSave }) => {
   );
 };
 
-const UserManagement = () => (
-  <div className="animate-fade-in">
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-      <h3 style={{ fontSize: '1.25rem' }}>User Management</h3>
-      <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>
-        <Plus size={16} /> Create User
-      </button>
+const UserManagement = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  
+  const [formData, setFormData] = useState({ name: '', email: '', roleName: 'Receptionist', password: '', status: 'active' });
+  const [resetPassword, setResetPassword] = useState('');
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await API.get('/users');
+      if (res.data.success) {
+        setUsers(res.data.data);
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to fetch users', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleOpenCreate = () => {
+    setFormData({ name: '', email: '', roleName: 'Receptionist', password: '', status: 'active' });
+    setIsEditing(false);
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (user) => {
+    setFormData({ 
+      name: user.name, 
+      email: user.email, 
+      roleName: user.role?.name || user.role || 'Receptionist', 
+      status: user.status 
+    });
+    setSelectedUser(user);
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const [formErrors, setFormErrors] = useState({});
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setFormErrors({});
+    
+    // Validate
+    const validation = validateForm(isEditing ? editUserSchema : createUserSchema, formData);
+    if (!validation.success) {
+      setFormErrors(validation.errors);
+      return;
+    }
+
+    try {
+      if (isEditing) {
+        const res = await API.put(`/users/${selectedUser.id}`, formData);
+        if (res.data.success) {
+          showToast('User updated successfully', 'success');
+          setShowModal(false);
+          fetchUsers();
+        }
+      } else {
+        const res = await API.post('/auth/register', formData);
+        if (res.data.success) {
+          showToast('User created successfully', 'success');
+          setShowModal(false);
+          fetchUsers();
+        }
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to save user', 'error');
+    }
+  };
+
+  const handleDelete = async (user) => {
+    if (window.confirm(`Are you sure you want to delete ${user.name}?`)) {
+      try {
+        const res = await API.delete(`/users/${user.id}`);
+        if (res.data.success) {
+          showToast('User deleted successfully', 'success');
+          fetchUsers();
+        }
+      } catch (err) {
+        showToast(err.response?.data?.message || 'Failed to delete user', 'error');
+      }
+    }
+  };
+
+  const handleOpenReset = (user) => {
+    setSelectedUser(user);
+    setResetPassword('');
+    setShowResetModal(true);
+  };
+
+  const handleSaveReset = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await API.put(`/users/${selectedUser.id}/reset-password`, { newPassword: resetPassword });
+      if (res.data.success) {
+        showToast('Password reset successfully', 'success');
+        setShowResetModal(false);
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to reset password', 'error');
+    }
+  };
+
+  return (
+    <div className="animate-fade-in" style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h3 style={{ fontSize: '1.25rem' }}>User Management</h3>
+        <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={handleOpenCreate}>
+          <Plus size={16} /> Create User
+        </button>
+      </div>
+      
+      {loading ? (
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading users...</div>
+      ) : (
+        <div className="glass-card" style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)' }}>
+                <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Name</th>
+                <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Email</th>
+                <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Role</th>
+                <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Status</th>
+                <th style={{ padding: '1rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(user => (
+                <tr key={user.id} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
+                  <td style={{ padding: '1rem', fontWeight: 500 }}>{user.name}</td>
+                  <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{user.email}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <span style={{ fontSize: '0.85rem', padding: '0.2rem 0.5rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>{user.role?.name || user.role}</span>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                    <span className={`badge ${user.status === 'active' ? 'badge-success' : 'badge-secondary'}`}>{user.status}</span>
+                  </td>
+                  <td style={{ padding: '1rem', textAlign: 'right' }}>
+                    <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginRight: '0.5rem' }} title="Reset Password" onClick={() => handleOpenReset(user)}><Key size={14} /></button>
+                    <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginRight: '0.5rem' }} onClick={() => handleOpenEdit(user)}><Edit2 size={14} /></button>
+                    <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', color: 'var(--danger)' }} onClick={() => handleDelete(user)}><Trash2 size={14} /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* User Modal */}
+      {showModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="glass-card" style={{ padding: '2rem', width: '100%', maxWidth: '400px' }}>
+            <h4 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>{isEditing ? 'Edit User' : 'Create User'}</h4>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Name</label>
+                <input type="text" className="form-input" value={formData.name} onChange={e => { setFormData({...formData, name: e.target.value}); setFormErrors({...formErrors, name: null}) }} />
+                {formErrors.name && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{formErrors.name}</span>}
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input type="email" className="form-input" value={formData.email} onChange={e => { setFormData({...formData, email: e.target.value}); setFormErrors({...formErrors, email: null}) }} disabled={isEditing} />
+                {formErrors.email && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{formErrors.email}</span>}
+              </div>
+              {!isEditing && (
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input type="password" className="form-input" value={formData.password} onChange={e => { setFormData({...formData, password: e.target.value}); setFormErrors({...formErrors, password: null}) }} />
+                  {formErrors.password && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{formErrors.password}</span>}
+                </div>
+              )}
+              <div className="form-group">
+                <label className="form-label">Role</label>
+                <select className="form-select" value={formData.roleName} onChange={e => { setFormData({...formData, roleName: e.target.value}); setFormErrors({...formErrors, roleName: null}) }}>
+                  <option value="Admin">Admin</option>
+                  <option value="Receptionist">Receptionist</option>
+                  <option value="Counselor">Counselor</option>
+                </select>
+                {formErrors.roleName && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{formErrors.roleName}</span>}
+              </div>
+              {isEditing && (
+                <div className="form-group">
+                  <label className="form-label">Status</label>
+                  <select className="form-select" value={formData.status} onChange={e => { setFormData({...formData, status: e.target.value}); setFormErrors({...formErrors, status: null}) }}>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  {formErrors.status && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.2rem' }}>{formErrors.status}</span>}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save</button>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="glass-card" style={{ padding: '2rem', width: '100%', maxWidth: '400px' }}>
+            <h4 style={{ marginBottom: '1.5rem', fontSize: '1.1rem' }}>Reset Password for {selectedUser?.name}</h4>
+            <form onSubmit={handleSaveReset} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <input required type="password" className="form-input" value={resetPassword} onChange={e => setResetPassword(e.target.value)} />
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Reset</button>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowResetModal(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
-    <div className="glass-card" style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-        <thead>
-          <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)' }}>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Name</th>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Email</th>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Role</th>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Status</th>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[
-            { id: 1, name: 'Admin User', email: 'admin@institute.edu', role: 'Admin', status: 'Active' },
-            { id: 2, name: 'Sarah Jenkins', email: 'sarah@institute.edu', role: 'Receptionist', status: 'Active' },
-            { id: 3, name: 'Mike Ross', email: 'mike@institute.edu', role: 'Counselor', status: 'Inactive' },
-          ].map(user => (
-            <tr key={user.id} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
-              <td style={{ padding: '1rem', fontWeight: 500 }}>{user.name}</td>
-              <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{user.email}</td>
-              <td style={{ padding: '1rem' }}>
-                <span style={{ fontSize: '0.85rem', padding: '0.2rem 0.5rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>{user.role}</span>
-              </td>
-              <td style={{ padding: '1rem' }}>
-                <span className={`badge ${user.status === 'Active' ? 'badge-success' : 'badge-secondary'}`}>{user.status}</span>
-              </td>
-              <td style={{ padding: '1rem', textAlign: 'right' }}>
-                <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginRight: '0.5rem' }} title="Reset Password" onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}><Key size={14} /></button>
-                <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginRight: '0.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}><Edit2 size={14} /></button>
-                <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', color: 'var(--danger)' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}><Trash2 size={14} /></button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
+  );
+};
 
 const SecuritySettings = () => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -417,15 +604,15 @@ const SecuritySettings = () => {
         <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Change Password</h4>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', maxWidth: '400px' }}>
           <div className="form-group">
-            <label className="form-label">Current Password</label>
+            <label className="form-label">Current Password <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="password" className="form-input" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">New Password</label>
+            <label className="form-label">New Password <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="password" className="form-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">Confirm New Password</label>
+            <label className="form-label">Confirm New Password <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="password" className="form-input" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
           </div>
           <button className="btn btn-primary" style={{ marginTop: '0.5rem' }} onClick={handleUpdatePassword} disabled={loading}>
@@ -438,13 +625,13 @@ const SecuritySettings = () => {
         <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Access & Sessions</h4>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
           <div className="form-group">
-            <label className="form-label">Two-Factor Authentication (2FA)</label>
+            <label className="form-label">Two-Factor Authentication (2FA) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
               <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Coming soon in a future update.</span>
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Session Timeout (Minutes)</label>
+            <label className="form-label">Session Timeout (Minutes) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
             <input type="number" className="form-input" defaultValue="60" style={{ maxWidth: '200px' }} />
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Users will be automatically logged out after this period of inactivity.</p>
           </div>
@@ -606,6 +793,8 @@ const AdminSettings = () => {
     }
   };
 
+  const { user } = useContext(AuthContext);
+
   const menuItems = [
     { id: 'institute', label: 'Institute Settings', icon: Building2 },
     { id: 'fee', label: 'Fee Settings', icon: Wallet },
@@ -616,7 +805,10 @@ const AdminSettings = () => {
     { id: 'backup', label: 'Backup & Restore', icon: Database },
     { id: 'audit', label: 'Audit Logs', icon: ScrollText },
     { id: 'about', label: 'About', icon: Info },
-  ];
+  ].filter(item => {
+    if (item.id === 'users' && user?.role !== 'Admin') return false;
+    return true;
+  });
 
   const renderSection = () => {
     if (loadingSettings && ['institute', 'fee', 'receipt'].includes(activeSection)) {

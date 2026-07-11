@@ -190,7 +190,7 @@ const Step1 = ({
             </div>
 
             <div className="form-group">
-              <label className="form-label">Middle Name</label>
+              <label className="form-label">Middle Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="text"
                 name="middle_name"
@@ -202,7 +202,7 @@ const Step1 = ({
             </div>
 
             <div className="form-group">
-              <label className="form-label">Last Name</label>
+              <label className="form-label">Last Name <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="text"
                 name="last_name"
@@ -216,7 +216,7 @@ const Step1 = ({
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="form-group">
-              <label className="form-label">Gender</label>
+              <label className="form-label">Gender <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
               <select
                 name="gender"
                 className="form-select"
@@ -230,7 +230,7 @@ const Step1 = ({
               </select>
             </div>
             <div className="form-group">
-              <label className="form-label">Date of Birth</label>
+              <label className="form-label">Date of Birth <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="date"
                 name="dob"
@@ -312,7 +312,7 @@ const Step1 = ({
               </div>
             )}
             <div className="form-group">
-              <label className="form-label">Aadhaar Number</label>
+              <label className="form-label">Aadhaar Number <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
               <input
                 type="text"
                 name="aadhaar_number"

@@ -278,7 +278,7 @@ const ReceptionistDashboard = () => {
 
                   {/* Status */}
                   <div className="form-group" style={{ marginBottom: '1rem' }}>
-                    <label className="form-label">Pipeline Status</label>
+                    <label className="form-label">Pipeline Status <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                     <select className="form-select" value={updatingStatus} onChange={(e) => handleStatusUpdate(e.target.value)}>
                       <option value="New">New</option>
                       <option value="Contacted">Contacted</option>

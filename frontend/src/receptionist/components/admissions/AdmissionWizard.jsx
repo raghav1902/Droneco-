@@ -555,7 +555,7 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
                 <div className="bg-card border border-border rounded-lg shadow-sm p-6 mb-6">
                   <h4 className="font-semibold text-foreground mb-4">Payment Collection</h4>
                   <div className="form-group">
-                    <label className="form-label">Amount to Collect Today</label>
+                    <label className="form-label">Amount to Collect Today <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">₹</span>
                       <input type="number" className="form-input text-lg font-semibold" style={{ paddingLeft: '2rem' }} value={formData.amountCollected} onChange={(e) => setFormData({ ...formData, amountCollected: e.target.value })} placeholder="0.00" />

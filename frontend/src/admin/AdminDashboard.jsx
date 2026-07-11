@@ -330,7 +330,7 @@ const AdminDashboard = () => {
                     <input type="number" className="form-input" value={courseForm.duration_months} onChange={(e) => setCourseForm({ ...courseForm, duration_months: Number(e.target.value) })} required />
                   </div>
                   <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label className="form-label">Course Description</label>
+                    <label className="form-label">Course Description <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                     <textarea className="form-textarea" rows="2" value={courseForm.description} onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}></textarea>
                   </div>
                   <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
@@ -403,7 +403,7 @@ const AdminDashboard = () => {
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <div className="form-group">
-                      <label className="form-label">Field Type</label>
+                      <label className="form-label">Field Type <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
                       <select className="form-select" value={questionForm.field_type} onChange={(e) => setQuestionForm({ ...questionForm, field_type: e.target.value })}>
                         <option value="text">Text Input</option>
                         <option value="dropdown">Dropdown</option>
