@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { showToast } from '../../../utils/toast.js';
 import API from '../../../api/api.js';
 import { changePasswordSchema, settingsSchema, validateForm, createUserSchema, editUserSchema } from '../../../utils/validators.js';
 import { ROLE_OPTIONS } from '../../../utils/roles.js';
-import { AuthContext } from '../../../context/AuthContext.jsx';
+import { useAuth } from '../../../context/AuthContext.jsx';
 
 import {
   Building2, Wallet, Receipt, Users, Shield,
@@ -87,59 +87,7 @@ const InstituteSettings = ({ settings, setSettings, onSave }) => {
   );
 };
 
-const FeeSettings = ({ settings, setSettings, onSave }) => (
-  <div className="animate-fade-in">
-    <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Fee Settings</h3>
-    <div className="glass-card" style={{ padding: '2rem' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-        <div className="form-group">
-          <label className="form-label">Default Due Date <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-          <select className="form-select" value={settings.defaultDueDate || ''} onChange={e => setSettings(s => ({ ...s, defaultDueDate: e.target.value }))}>
-            <option>5th of every month</option>
-            <option>10th of every month</option>
-            <option>15th of every month</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <label className="form-label">Grace Period (Days) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-          <input type="number" className="form-input" value={settings.gracePeriodDays || 0} onChange={e => setSettings(s => ({ ...s, gracePeriodDays: parseInt(e.target.value) || 0 }))} />
-        </div>
-        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-          <label className="form-label">Late Fee <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <input type="number" className="form-input" value={settings.lateFeeAmount || 0} onChange={e => setSettings(s => ({ ...s, lateFeeAmount: parseInt(e.target.value) || 0 }))} placeholder="Amount" style={{ width: '150px' }} />
-            <select className="form-select" style={{ width: '150px' }} value={settings.lateFeeType || ''} onChange={e => setSettings(s => ({ ...s, lateFeeType: e.target.value }))}>
-              <option>Per Day</option>
-              <option>Per Week</option>
-              <option>Per Month</option>
-            </select>
-          </div>
-        </div>
-        <div className="form-group">
-          <label className="form-label">Allow Partial Payments <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="partial" checked={settings.allowPartialPayments === true} onChange={() => setSettings(s => ({ ...s, allowPartialPayments: true }))} /> On</label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="partial" checked={settings.allowPartialPayments === false} onChange={() => setSettings(s => ({ ...s, allowPartialPayments: false }))} /> Off</label>
-          </div>
-        </div>
-        <div className="form-group">
-          <label className="form-label">Allow Installments <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="installments" checked={settings.allowInstallments === true} onChange={() => setSettings(s => ({ ...s, allowInstallments: true }))} /> On</label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><input type="radio" name="installments" checked={settings.allowInstallments === false} onChange={() => setSettings(s => ({ ...s, allowInstallments: false }))} /> Off</label>
-          </div>
-        </div>
-        <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-          <label className="form-label">Tax Percentage (%) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-          <input type="number" className="form-input" value={settings.taxPercentage || 0} onChange={e => setSettings(s => ({ ...s, taxPercentage: parseInt(e.target.value) || 0 }))} style={{ maxWidth: '200px' }} />
-        </div>
-      </div>
-      <button className="btn btn-primary" style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={() => onSave({ fee: settings })}>
-        <Save size={16} /> Save Changes
-      </button>
-    </div>
-  </div>
-);
+
 
 const ReceiptSettings = ({ settings, setSettings, onSave }) => (
   <div className="animate-fade-in">
@@ -640,62 +588,12 @@ const SecuritySettings = () => {
         </div>
       </div>
 
-      <div className="glass-card" style={{ padding: '2rem' }}>
-        <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Access & Sessions</h4>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
-          <div className="form-group">
-            <label className="form-label">Two-Factor Authentication (2FA) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Coming soon in a future update.</span>
-            </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Session Timeout (Minutes) <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-            <input type="number" className="form-input" defaultValue="60" style={{ maxWidth: '200px' }} />
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Users will be automatically logged out after this period of inactivity.</p>
-          </div>
-          <div>
-            <button className="btn btn-secondary" style={{ marginTop: '0.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>View Login History</button>
-            <button className="btn btn-secondary" style={{ marginTop: '0.5rem', marginLeft: '1rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>Manage Active Devices</button>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };
 
-const BackupRestore = () => (
-  <div className="animate-fade-in">
-    <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Backup & Restore</h3>
-    <div className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div>
-        <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Download Backup</h4>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>Generate and download a complete backup of the database.</p>
-        <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>
-          <Download size={16} /> Download SQL Backup
-        </button>
-      </div>
-      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
-        <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Restore Backup</h4>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>Upload a previous backup file to restore the database. <strong style={{ color: 'var(--danger)' }}>Warning: This will overwrite all current data.</strong></p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <input type="file" className="form-input" style={{ maxWidth: '300px' }} />
-          <button className="btn btn-danger" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>
-            <Upload size={16} /> Restore
-          </button>
-        </div>
-      </div>
-      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
-        <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Export Data</h4>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>Export complete system reports (Students, Fees, Leads).</p>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn btn-secondary" onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>Export to Excel (CSV)</button>
-          <button className="btn btn-secondary" onClick={(e) => { e.preventDefault(); showToast('Action processed successfully!', 'success'); }}>Export to PDF</button>
-        </div>
-      </div>
-    </div>
-  </div>
-);
+
 
 const AuditLogs = () => (
   <div className="animate-fade-in">
@@ -732,7 +630,7 @@ const AuditLogs = () => (
   </div>
 );
 
-const About = () => (
+const About = ({ settings, setSettings, onSave }) => (
   <div className="animate-fade-in">
     <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>About System</h3>
     <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
@@ -740,22 +638,33 @@ const About = () => (
         <Building2 size={48} />
       </div>
       <h2 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Institute Management System</h2>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Version 1.0.0 (Build 20260703)</p>
+      <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Version {settings.version || '1.0.0'} (Build {settings.build || '20260703'})</p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', textAlign: 'left', background: 'var(--bg-app)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border)', paddingBottom: '0.5rem' }}>
-          <span style={{ color: 'var(--text-muted)' }}>Developer</span>
-          <span style={{ fontWeight: 500 }}>Antigravity Tech</span>
+        <div className="form-group">
+           <label className="form-label">Developer</label>
+           <input type="text" className="form-input" value={settings.developer || ''} onChange={e => setSettings(s => ({...s, developer: e.target.value}))} />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border)', paddingBottom: '0.5rem' }}>
-          <span style={{ color: 'var(--text-muted)' }}>Support Contact</span>
-          <span style={{ fontWeight: 500 }}>support@antigravity.tech</span>
+        <div className="form-group">
+           <label className="form-label">Support Contact</label>
+           <input type="text" className="form-input" value={settings.supportEmail || ''} onChange={e => setSettings(s => ({...s, supportEmail: e.target.value}))} />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span style={{ color: 'var(--text-muted)' }}>License</span>
-          <span style={{ fontWeight: 500 }}>Commercial - Single Institute</span>
+        <div className="form-group">
+           <label className="form-label">Version</label>
+           <input type="text" className="form-input" value={settings.version || ''} onChange={e => setSettings(s => ({...s, version: e.target.value}))} />
+        </div>
+        <div className="form-group">
+           <label className="form-label">Build</label>
+           <input type="text" className="form-input" value={settings.build || ''} onChange={e => setSettings(s => ({...s, build: e.target.value}))} />
+        </div>
+        <div className="form-group">
+           <label className="form-label">License</label>
+           <input type="text" className="form-input" value={settings.license || ''} onChange={e => setSettings(s => ({...s, license: e.target.value}))} />
         </div>
       </div>
+      <button className="btn btn-primary" style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', justifyContent: 'center' }} onClick={() => onSave({ about: settings })}>
+          <Save size={16} /> Save Changes
+      </button>
     </div>
   </div>
 );
@@ -766,7 +675,7 @@ const AdminSettings = () => {
   const [activeSection, setActiveSection] = useState('institute');
 
   const [instituteSettings, setInstituteSettings] = useState({});
-  const [feeSettings, setFeeSettings] = useState({});
+  const [aboutSettings, setAboutSettings] = useState({});
   const [receiptSettings, setReceiptSettings] = useState({});
   const [formConfigSettings, setFormConfigSettings] = useState({});
   const [loadingSettings, setLoadingSettings] = useState(true);
@@ -775,8 +684,19 @@ const AdminSettings = () => {
     try {
       const response = await API.get('/settings');
       if (response.data.success && response.data.data) {
-        setInstituteSettings(response.data.data.institute || {});
-        setFeeSettings(response.data.data.fee || {});
+        setInstituteSettings(response.data.data.institute || {
+          name: 'Droneco',
+          address: 'B-120 Sector 88 Noida UP IN 201305',
+          contact: '+91 931 900 7542',
+          email: 'info@godroneco.com'
+        });
+        setAboutSettings(response.data.data.about || {
+          developer: 'Droneco',
+          supportEmail: 'info@godroneco.com',
+          version: '1.0.0',
+          build: '20260703',
+          license: 'Commercial - Single Institute'
+        });
         setReceiptSettings(response.data.data.receipt || {});
         setFormConfigSettings(response.data.data.formConfig || {});
       }
@@ -812,16 +732,16 @@ const AdminSettings = () => {
     }
   };
 
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
 
   const menuItems = [
     { id: 'institute', label: 'Institute Settings', icon: Building2 },
-    { id: 'fee', label: 'Fee Settings', icon: Wallet },
+
     { id: 'receipt', label: 'Receipt Settings', icon: Receipt },
     { id: 'form', label: 'Form Config', icon: Settings },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'security', label: 'Security', icon: Shield },
-    { id: 'backup', label: 'Backup & Restore', icon: Database },
+
     { id: 'audit', label: 'Audit Logs', icon: ScrollText },
     { id: 'about', label: 'About', icon: Info },
   ].filter(item => {
@@ -836,14 +756,14 @@ const AdminSettings = () => {
 
     switch (activeSection) {
       case 'institute': return <InstituteSettings settings={instituteSettings} setSettings={setInstituteSettings} onSave={handleSaveSettings} />;
-      case 'fee': return <FeeSettings settings={feeSettings} setSettings={setFeeSettings} onSave={handleSaveSettings} />;
+
       case 'receipt': return <ReceiptSettings settings={receiptSettings} setSettings={setReceiptSettings} onSave={handleSaveSettings} />;
       case 'form': return <FormConfigSettings settings={formConfigSettings} setSettings={setFormConfigSettings} onSave={handleSaveSettings} />;
       case 'users': return <UserManagement />;
       case 'security': return <SecuritySettings />;
-      case 'backup': return <BackupRestore />;
+
       case 'audit': return <AuditLogs />;
-      case 'about': return <About />;
+      case 'about': return <About settings={aboutSettings} setSettings={setAboutSettings} onSave={handleSaveSettings} />;
       default: return <InstituteSettings settings={instituteSettings} setSettings={setInstituteSettings} onSave={handleSaveSettings} />;
     }
   };

@@ -93,7 +93,7 @@ const StudentSchema = new mongoose.Schema({
 
   // Relationships (Foreign Keys)
   parent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Parent' },
-  department_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Department' },
+  department_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
   program_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Program' },
   
   // Current Enrollment Status
