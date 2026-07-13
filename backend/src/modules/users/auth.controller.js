@@ -63,8 +63,19 @@ const registerUser = async (req, res) => {
       res.status(400).json({ success: false, message: 'Invalid user data' });
     }
   } catch (error) {
+    console.error('================ DIAGNOSTIC ERROR LOG ================');
     console.error('Error registering user:', error);
-    res.status(500).json({ success: false, message: 'Server error registering user' });
+    console.error(`Name: ${error.name}`);
+    console.error(`Message: ${error.message}`);
+    console.error(`Stack: ${error.stack}`);
+    console.error('======================================================');
+    
+    // Explicitly send the exact error message to the client temporarily
+    res.status(500).json({ 
+      success: false, 
+      message: `Render Live Error: ${error.message}`,
+      errorType: error.name
+    });
   }
 };
 
