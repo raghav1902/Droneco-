@@ -249,8 +249,7 @@ const StudentForm = () => {
     }
 
     if (currentStep === 2) {
-      if (formConfig?.marital_status?.visible !== false && formConfig?.marital_status?.required && !formData.marital_status) missingFields.push("Marital Status");
-      if (formConfig?.identification_marks?.visible !== false && formConfig?.identification_marks?.required && !formData.identification_mark_1) missingFields.push("Identification Mark 1");
+      // Disabilitiy checks or others if necessary
     }
 
     if (currentStep === 3 && formData.filler_type === 'student') {
@@ -284,7 +283,6 @@ const StudentForm = () => {
       if (!formData.interested_course_id) missingFields.push("Interested Course");
       if (!formData.admission_year) missingFields.push("Admission Year");
       if (!formData.department) missingFields.push("Department");
-      if (!formData.semester) missingFields.push("Semester");
     }
 
     if (missingFields.length > 0) {

@@ -13,46 +13,7 @@ const StepPersonal = ({ formData, handleBasicChange, prevStep, nextStep, formCon
           Personal Information
         </h3>
 
-        {formConfig?.marital_status?.visible !== false && (
-          <div className="form-group">
-            <label className="form-label">Marital Status {formConfig?.marital_status?.required ? '*' : ''}</label>
-            <select
-              name="marital_status"
-              className="form-select"
-              value={formData.marital_status}
-              onChange={handleBasicChange}
-            >
-              <option value="">Select</option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
-            </select>
-          </div>
-        )}
 
-        {formConfig?.identification_marks?.visible !== false && (
-          <div className='form-grid-2'>
-            <div className="form-group">
-              <label className="form-label">Identification Mark 1 {formConfig?.identification_marks?.required ? '*' : ''}</label>
-              <input
-                type="text"
-                name="identification_mark_1"
-                className="form-input"
-                value={formData.identification_mark_1}
-                onChange={handleBasicChange}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Identification Mark 2 <span style={{ color: "var(--text-muted)", fontSize: "0.85em", fontWeight: "normal" }}>(Optional)</span></label>
-              <input
-                type="text"
-                name="identification_mark_2"
-                className="form-input"
-                value={formData.identification_mark_2}
-                onChange={handleBasicChange}
-              />
-            </div>
-          </div>
-        )}
 
         {formConfig?.disability?.visible !== false && (
           <div className='form-grid-1-2'>
