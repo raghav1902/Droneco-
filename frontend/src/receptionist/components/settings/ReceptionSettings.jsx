@@ -3,6 +3,7 @@ import { User, Shield, Save, Upload } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { showToast } from '../../../utils/toast.js';
 import { changePasswordSchema, validateForm } from '../../../utils/validators.js';
+import API from '../../../api/api.js';
 
 
 const ProfileSettings = () => {
@@ -27,7 +28,6 @@ const ProfileSettings = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { default: API } = await import('../../../api/api');
       const response = await API.put('/auth/profile', {
         name,
         phone,
@@ -113,7 +113,6 @@ const AccountSettings = () => {
 
     setLoading(true);
     try {
-      const { default: API } = await import('../../../api/api');
       const response = await API.put('/auth/change-password', {
         currentPassword,
         newPassword

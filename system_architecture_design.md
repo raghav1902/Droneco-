@@ -7,24 +7,24 @@ The **Droneco Lead Management System** follows a decoupled client-server archite
 - **Backend:** A Node.js/Express REST API serving JSON (via Render).
 - **Database:** MongoDB (via Render or Atlas) acting as the single source of truth.
 
-## 2. Directory Structure (Domain-Driven Design)
+## 2. Directory Structure (MVC Architecture)
 
-The backend is structured using Domain-Driven Design (DDD) principles to group logic by business domain rather than technical function.
+The backend is structured using the standard Model-View-Controller (MVC) architectural pattern, separating concerns based on their technical function.
 
 ```text
-backend/src/modules/
-├── users/         # Auth, RBAC, User Management (Admin vs Receptionist)
-├── core/          # Courses, Settings, Uploads, Admin Reports
-├── leads/         # Inquiry tracking, Follow-ups, Dynamic Questions
-├── students/      # Admissions, Student Profiles, Documents
-└── finance/       # Fees, Payments, Invoices, Discount Rules
+backend/src/
+├── models/         # Mongoose Schemas (Data Layer & Business Rules)
+├── controllers/    # Business Logic and Request Handlers
+├── routes/         # Express Routers (API Endpoints & View Layer)
+├── utils/          # Shared helper functions and utilities
+└── middleware/     # Custom Express middleware (Auth, Error Handling, etc.)
 ```
 
-Each domain module encapsulates its own:
-- `*.model.js` (Mongoose Schema)
-- `*.routes.js` (Express Router)
-- `*.controller.js` (Business Logic)
-- `*.validation.js` (Zod Schemas)
+This structure organizes files by their role:
+- **Models (`models/*.model.js`)**: Define the structure of the data and interact directly with the MongoDB database. They may also contain pre-save hooks and data sanitization logic.
+- **Controllers (`controllers/*.controller.js`)**: Contain the core business logic, handle transactions, process incoming requests, and return appropriate responses.
+- **Routes (`routes/*.routes.js`)**: Map HTTP methods and endpoints to specific controller functions.
+- **Validation**: Zod or Joi schemas are typically used at the route or controller level to validate incoming request payloads.
 
 ## 3. Database Schema & ERD
 
