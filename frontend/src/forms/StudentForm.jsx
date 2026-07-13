@@ -9,7 +9,6 @@ import StepParentGuardian from './StepParentGuardian';
 import StepAddress from './StepAddress';
 import StepAcademic from './StepAcademic';
 import StepCourse from './StepCourse';
-import StepMedia from './StepMedia';
 import Step2 from './Step2';
 import Step3 from './Step3';
 import Review from './Review';
@@ -290,7 +289,7 @@ const StudentForm = () => {
       return;
     }
 
-    if (currentStep === 8) {
+    if (currentStep === 7) {
       if (!validateStep2Dynamic()) {
         alert("Please fill all required fields in this step.");
         return;
@@ -327,8 +326,10 @@ const StudentForm = () => {
         ...formData
       };
 
-      await API.post('/leads', payload);
-      setCurrentStep(11); // Show success step
+      const res = await API.post('/leads', payload);
+      if (res.data.success) {
+        setCurrentStep(10); // Show success step
+      }
     } catch (err) {
       console.error('Submission error:', err);
       setError(err.response?.data?.message || 'Failed to submit inquiry. Please try again.');
@@ -397,7 +398,7 @@ const StudentForm = () => {
             Droneco <br />Coaching Institute
           </h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '1.5rem', maxWidth: '360px', fontSize: '1rem', lineHeight: '1.6' }}>
-            {currentStep === 11
+            {currentStep === 10
               ? 'Your inquiry is complete. Thank you for choosing Droneco.'
               : currentStep === 0
                 ? 'Welcome to Droneco. Please select who is filling out this form to customize your registration experience.'
@@ -406,13 +407,13 @@ const StudentForm = () => {
         </div>
 
         {/* Subtle Step Tracker */}
-        {currentStep >= 1 && currentStep <= 10 && (
+        {currentStep >= 1 && currentStep <= 9 && (
           <div style={{ marginTop: '3rem' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontWeight: 550, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Step <strong style={{ color: 'var(--text-main)' }}>{currentStep}</strong> of 10
+              Step <strong style={{ color: 'var(--text-main)' }}>{currentStep}</strong> of 9
             </div>
             <div style={{ display: 'flex', gap: '6px', width: '220px' }}>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(step => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(step => (
                 <div key={step} style={{
                   height: '3px',
                   flex: 1,
@@ -503,17 +504,6 @@ const StudentForm = () => {
           )}
 
           {currentStep === 7 && (
-            <StepMedia
-              formData={formData}
-              handleBasicChange={handleBasicChange}
-              validationErrors={validationErrors}
-              prevStep={prevStep}
-              nextStep={nextStep}
-              formConfig={formConfig}
-            />
-          )}
-
-          {currentStep === 8 && (
             <Step2
               formData={formData}
               validationErrors={validationErrors}
@@ -525,7 +515,7 @@ const StudentForm = () => {
             />
           )}
 
-          {currentStep === 9 && (
+          {currentStep === 8 && (
             <Step3
               formData={formData}
               handleFeedbackChange={handleFeedbackChange}
@@ -534,7 +524,7 @@ const StudentForm = () => {
             />
           )}
 
-          {currentStep === 10 && (
+          {currentStep === 9 && (
             <Review
               formData={formData}
               courses={courses}
@@ -545,7 +535,7 @@ const StudentForm = () => {
             />
           )}
 
-          {currentStep === 11 && (
+          {currentStep === 10 && (
             <Success
               formData={formData}
               setCurrentStep={setCurrentStep}
