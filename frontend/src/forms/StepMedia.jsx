@@ -11,14 +11,14 @@ const StepMedia = ({ formData, handleBasicChange, prevStep, nextStep, validation
 
     setUploading(true);
     const data = new FormData();
-    data.append('file', file);
+    data.append('document', file);
 
     try {
       const res = await API.post('/upload', data, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       if (res.data.success) {
-        handleBasicChange({ target: { name: fieldName, value: res.data.url } });
+        handleBasicChange({ target: { name: fieldName, value: res.data.filePath } });
       }
     } catch (err) {
       console.error('Upload error:', err);
