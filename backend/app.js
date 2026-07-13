@@ -21,6 +21,7 @@ connectDB();
 
 // Initialize Express app
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy (Render load balancer) for rate limiting
 
 // Security Headers
 app.use(helmet());

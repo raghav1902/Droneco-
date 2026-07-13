@@ -149,8 +149,14 @@ const courseSchema = z.object({
   code: z.string().min(1, "Course code is required"),
   description: z.string().optional(),
   duration_months: z.number().positive("Duration must be a positive number"),
-  is_active: z.boolean().optional()
+  is_active: z.boolean().optional(),
+  fee_structure: z.object({
+    total_fee: z.number().min(0, "Fee cannot be negative").optional(),
+    installments_allowed: z.boolean().optional()
+  }).optional()
 });
+
+const updateCourseSchema = courseSchema.partial();
 
 const discountSchema = z.object({
   name: z.string().min(1, "Discount name is required"),
@@ -247,6 +253,7 @@ module.exports = {
   updateLeadStatusSchema,
   addFeedbackSchema,
   courseSchema,
+  updateCourseSchema,
   discountSchema,
   collectFeeSchema,
   settingsSchema,
