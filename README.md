@@ -15,10 +15,11 @@ A comprehensive, full-stack **MERN** (MongoDB, Express, React, Node.js) applicat
 ### Backend (Server)
 - **Environment:** Node.js with Express.js
 - **Database:** MongoDB via Mongoose ODM, utilizing **MongoDB Transactions** for multi-document atomicity (e.g., admitting a student and generating fee structures in one go).
-- **Authentication:** JSON Web Tokens (JWT) for stateless, secure API access.
+- **Authentication:** Fully robust JSON Web Tokens (JWT) mapped securely to MongoDB `User` collections, removing any reliance on mock stores.
+- **Media Storage:** Integrated with **Cloudinary** for scalable, secure handling of student profile photos, signatures, and document uploads.
 - **Security:** 
   - `helmet` for HTTP header security.
-  - `express-rate-limit` to prevent brute force.
+  - `express-rate-limit` to prevent brute force (including protected media upload endpoints).
   - `express-mongo-sanitize` for NoSQL injection prevention.
   - Strict CORS configuration configurable via `.env`.
   - **Zod** integrated for robust backend schema validation.

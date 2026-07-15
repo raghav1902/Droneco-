@@ -101,9 +101,10 @@ Admitting a student is the most complex operation in the system. Because it touc
 5. **Initial Payment (Optional):** If the user pays an upfront fee, a `Payment` document is created and the `Fee` balance is updated.
 6. **Transaction Commit:** `session.commitTransaction()` executes all inserts atomically.
 
-## 5. Security & Validation
+## 5. Security, Validation & Third-Party Integrations
 
+- **Authentication (MongoDB & JWT):** A fully secure authentication system is implemented using MongoDB to store user credentials (hashed). Stateless JWT tokens are passed via the `Authorization: Bearer <token>` header for session management.
+- **Media Asset Storage (Cloudinary):** User-uploaded assets like profile photos, ID proofs, and signatures are securely uploaded to **Cloudinary** via a protected `multer` endpoint. Only authenticated staff can upload media, preventing public endpoints from being abused.
 - **Zod Validation:** Request payloads are validated at the router level before hitting controllers.
-- **Authentication:** Stateless JWT tokens passed via the `Authorization: Bearer <token>` header.
-- **RBAC Middleware:** Routes are protected by `authorizeRole(['Admin', 'Receptionist'])` wrappers.
+- **RBAC Middleware:** Routes are protected by `authorize('Admin', 'Receptionist')` wrappers.
 - **Data Sanitization:** `express-mongo-sanitize` scrubs `$where` and other malicious injection vectors from req.body/params.

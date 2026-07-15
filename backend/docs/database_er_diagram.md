@@ -31,15 +31,6 @@ erDiagram
         ObjectId _id PK
         String name
         String code "Unique"
-        ObjectId department_id FK
-    }
-
-    DEPARTMENTS {
-        ObjectId _id PK
-        String name
-        String code
-    }
-
     LEADS {
         ObjectId _id PK
         String full_name
@@ -56,7 +47,7 @@ erDiagram
         String student_id
         String enrollment_number
         ObjectId parent_id FK "ref PARENTS"
-        ObjectId department_id FK "ref COURSES/DEPARTMENTS"
+        ObjectId department_id FK "ref COURSES/PROGRAMS"
         ObjectId program_id FK "ref PROGRAMS"
         String status "ACTIVE | SUSPENDED | ALUMNI | DROPOUT"
     }
@@ -116,12 +107,6 @@ erDiagram
         Date next_follow_up_date
     }
 
-    AUDIT_LOG {
-        ObjectId _id PK
-        String action
-        String details
-    }
-
     %% Relationships
     USERS ||--o{ LEADS : "assigned_to"
     COURSES ||--o{ LEADS : "selected_in"
@@ -176,8 +161,8 @@ Stores global discounts that can be applied to fees.
 **Settings Collection (`settings`)**
 Stores global system configurations (e.g., fee grace periods, institute name, receipt prefixes).
 
-**Program & Department Collections (`programs`, `departments`)**
-Stores academic categorizations. (Yes, these are actual collections in the codebase!)
+**Program Collection (`programs`)**
+Stores academic categorizations like Course Programs.
 
 ### Lead & Inquiry Models (The "Pre-Admission" Flow)
 
@@ -196,6 +181,3 @@ Dynamic form engine questions for Step 2/3 of the inquiry. (Lead Responses are s
 
 **FeedbackLog (`feedbacklogs`)**
 Call logs and notes written by Staff regarding a Lead, plus `nextFollowUpDate`.
-
-**Audit Log (`audit_logs`)**
-System logs tracking actions for compliance.
