@@ -3,7 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { Printer, X } from 'lucide-react';
 import API from '../../../api/api';
-
+import { getAssetUrl } from '../../../utils/assetUrl';
 const StudentIdCard = ({ student, onClose }) => {
   const printRef = useRef();
   const [courseName, setCourseName] = useState(
@@ -121,15 +121,11 @@ const StudentIdCard = ({ student, onClose }) => {
   // Strip hyphens for the barcode so it scans cleaner
   const barcodeValue = realStudentId.replace(/-/g, '');
 
-  // Resolve Photo URL securely using relative paths (bypasses CORS via Vite proxy)
-  const getPhotoUrl = (url) => {
-    if (!url) return null;
-    if (url.startsWith('http')) return url;
-    const cleanUrl = url.startsWith('/') ? url : `/${url}`;
-    // Rely on Vite proxy /api or /uploads pointing to backend
-    return `${cleanUrl}?t=${Date.now()}`;
-  };
-  const photoUrl = getPhotoUrl(student.photo_url || student.media?.photo_url);
+  // Resolve Photo URL securely using the backend URL
+  let photoUrl = getAssetUrl(student.photo_url || student.media?.photo_url);
+  if (photoUrl) {
+    photoUrl = `${photoUrl}?t=${Date.now()}`;
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex justify-center items-center overflow-y-auto p-4 sm:p-8">

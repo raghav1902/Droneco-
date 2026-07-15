@@ -4,7 +4,7 @@ import { User, Mail, Phone, MapPin, Calendar, FileText, CreditCard, History, Clo
 import API from '../../../api/api';
 import { showToast } from '../../../utils/toast';
 import StudentIdCard from './StudentIdCard';
-
+import { getAssetUrl } from '../../../utils/assetUrl';
 const StudentProfile = ({ student, onBack, onCollectFee }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [previewDoc, setPreviewDoc] = useState(null);
@@ -56,7 +56,7 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
     try {
       // 1. Upload the file to the server
       const uploadRes = await API.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': undefined } // Let the browser set it with the correct boundary
       });
 
       if (uploadRes.data?.success) {
@@ -145,7 +145,7 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
             <div className="px-6 pb-6 relative text-center">
               <div className="w-24 h-24 rounded-full bg-surface border-4 border-card text-primary flex items-center justify-center text-4xl font-bold shadow-md mx-auto -mt-12 mb-4 relative overflow-hidden">
                 {student.media?.photo_url || student.photo_url ? (
-                  <img src={`${student.media?.photo_url || student.photo_url}?t=${Date.now()}`} alt={fullName} className="w-full h-full object-cover" />
+                  <img src={`${getAssetUrl(student.media?.photo_url || student.photo_url)}?t=${Date.now()}`} alt={fullName} className="w-full h-full object-cover" />
                 ) : (
                   fullName.charAt(0).toUpperCase()
                 )}
@@ -437,7 +437,7 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                               </div>
                               <span className="font-medium text-foreground">{doc.label}</span>
                             </div>
-                            <a href={`http://localhost:5000${doc.url}`} target="_blank" rel="noreferrer" className="text-primary hover:underline text-sm font-medium">View File</a>
+                            <a href={getAssetUrl(doc.url)} target="_blank" rel="noreferrer" className="text-primary hover:underline text-sm font-medium">View File</a>
                           </div>
                         ) : null)}
                       </div>
