@@ -111,8 +111,10 @@ const getPayments = async (req, res) => {
       if (!/^[0-9a-fA-F]{24}$/.test(lead_id)) {
         return res.status(400).json({ success: false, message: 'Invalid lead ID format' });
       }
-      // Find all fees for this lead to filter payments
-      const fees = await Fee.find({ lead_id });
+      // Find all fees for this lead/student to filter payments
+      const fees = await Fee.find({
+        $or: [{ lead_id }, { student_id: lead_id }]
+      });
       const feeIds = fees.map(f => f._id);
       query.fee_id = { $in: feeIds };
     }

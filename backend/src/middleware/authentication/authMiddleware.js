@@ -59,4 +59,32 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+const optionalProtect = async (req, res, next) => {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'YOUR_JWT_SUPER_SECRET_KEY');
+      const user = await User.findById(decoded.id).select('-password').populate('role');
+      
+      if (user && user.status === 'active') {
+        req.user = {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          profile_photo: user.profile_photo,
+          role: user.role.name,
+          status: user.status
+        };
+      }
+    } catch (error) {
+      // Ignore token errors for optional auth
+    }
+  }
+  next();
+};
+
+module.exports = { protect, optionalProtect };

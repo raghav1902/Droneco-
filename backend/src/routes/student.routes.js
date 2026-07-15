@@ -17,6 +17,10 @@ router.get('/next-id', protect, authorize('Admin', 'Receptionist'), studentContr
 // @desc    Get all students
 router.get('/', protect, authorize('Admin', 'Receptionist'), studentController.getStudents);
 
+// @route   GET /api/v2/students/:id
+// @desc    Get a student by ID
+router.get('/:id', protect, authorize('Admin', 'Receptionist'), studentController.getStudentById);
+
 // @route   PUT /api/v2/students/:id
 // @desc    Update a student
 router.put('/:id', protect, authorize('Admin', 'Receptionist'), studentController.updateStudent);

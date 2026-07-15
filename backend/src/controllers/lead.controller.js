@@ -292,7 +292,8 @@ const updateLead = async (req, res) => {
       'interestedSubject', 'preferredBatch', 'learningMode', 'father', 'mother',
       'guardian', 'emergency_contact', 'previous_qualification', 'tenth_details',
       'twelfth_details', 'admission_year', 'department', 'branch', 'semester',
-      'section', 'mode_of_admission', 'queries', 'careerGoal', 'remarks', 'responses'
+      'section', 'mode_of_admission', 'queries', 'careerGoal', 'remarks', 'responses',
+      'photo_url', 'signature_url'
     ];
 
     const updateData = req.body;

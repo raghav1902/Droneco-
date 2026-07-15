@@ -188,8 +188,10 @@ const getFeesByStudent = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid lead ID format' });
     }
 
-    const fees = await Fee.find({ lead_id: leadId, is_deleted: { $ne: true } })
-      .populate('course_id', 'course_name');
+    const fees = await Fee.find({
+      $or: [{ lead_id: leadId }, { student_id: leadId }],
+      is_deleted: { $ne: true }
+    }).populate('course_id', 'course_name');
 
     res.status(200).json({
       success: true,

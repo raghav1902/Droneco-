@@ -4,6 +4,14 @@ const Lead = require('../models/lead.model'); // Legacy model
 const Fee = require('../models/fee.model');
 const Payment = require('../models/payment.model');
 const mongoose = require('mongoose');
+const { v2: cloudinary } = require('cloudinary');
+
+// Ensure cloudinary is configured
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 /**
  * @desc    Admit a Lead, creating a Student and Parent record
@@ -219,6 +227,37 @@ exports.getNextId = async (req, res, next) => {
 };
 
 /**
+ * @desc    Get student by ID
+ * @route   GET /api/v2/students/:id
+ * @access  Private (Admin, Receptionist)
+ */
+exports.getStudentById = async (req, res, next) => {
+  try {
+    const student = await Student.findById(req.params.id)
+      .populate('department_id');
+
+    if (!student) {
+      // Fallback: check if it's a legacy lead that hasn't been moved to student model
+      const lead = await Lead.findById(req.params.id);
+      if (lead) {
+        return res.status(200).json({
+          success: true,
+          data: lead
+        });
+      }
+      return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: student
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @desc    Update student details
  * @route   PUT /api/v2/students/:id
  * @access  Private (Admin, Receptionist)
@@ -232,6 +271,29 @@ exports.updateStudent = async (req, res, next) => {
     const student = await Student.findById(id);
     if (!student) {
       return res.status(404).json({ success: false, message: 'Student not found' });
+    }
+
+    // If photo_url is being updated, delete the old photo from Cloudinary
+    if (updateData.media?.photo_url && student.media?.photo_url) {
+      if (updateData.media.photo_url !== student.media.photo_url) {
+        try {
+          const oldUrl = student.media.photo_url;
+          if (oldUrl.includes('cloudinary.com')) {
+            const parts = oldUrl.split('/');
+            const filenameWithExt = parts.pop();
+            const folder = parts.pop();
+            const filename = filenameWithExt.split('.')[0];
+            const publicId = `${folder}/${filename}`;
+            
+            // Fire and forget deletion
+            cloudinary.uploader.destroy(publicId).catch(err => {
+              console.error('Failed to delete old Cloudinary photo:', err);
+            });
+          }
+        } catch (e) {
+          console.error('Error parsing Cloudinary URL for deletion:', e);
+        }
+      }
     }
 
     // Allowed fields for update

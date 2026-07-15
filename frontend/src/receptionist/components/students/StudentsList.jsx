@@ -171,9 +171,6 @@ const StudentsList = ({ onViewProfile, onCollectFee, onEnrollNew, onEditStudent 
                         <button className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted flex items-center gap-2" onClick={() => { onViewProfile(student); setActiveMenu(null); }}>
                           <Eye className="w-4 h-4 text-muted-foreground" /> View Profile
                         </button>
-                        <button className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted flex items-center gap-2" onClick={() => { if (onEditStudent) onEditStudent(student); setActiveMenu(null); }}>
-                          <Edit className="w-4 h-4 text-muted-foreground" /> Edit Info
-                        </button>
                         <div className="h-px bg-border my-1"></div>
                         <button className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted flex items-center gap-2" onClick={() => { onCollectFee(student); setActiveMenu(null); }}>
                           <CreditCard className="w-4 h-4 text-primary" /> Collect Fee

@@ -5,6 +5,7 @@ import API from '../../../api/api';
 import { showToast } from '../../../utils/toast';
 import StudentIdCard from './StudentIdCard';
 import { getAssetUrl } from '../../../utils/assetUrl';
+import EditStudentModal from './EditStudentModal';
 const StudentProfile = ({ student, onBack, onCollectFee }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [previewDoc, setPreviewDoc] = useState(null);
@@ -15,6 +16,9 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
   const [feeData, setFeeData] = useState(null);
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const [fullStudentData, setFullStudentData] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     if (!student || (!student._id && !student.id)) return;
@@ -23,9 +27,10 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [feeRes, payRes] = await Promise.all([
-          API.get(`/fees/student/${leadId}`),
-          API.get(`/payments?lead_id=${leadId}`)
+        const [feeRes, payRes, studentRes] = await Promise.all([
+          API.get(`/fees/student/${leadId}`).catch(() => ({ data: { data: [] } })),
+          API.get(`/payments?lead_id=${leadId}`).catch(() => ({ data: { data: [] } })),
+          API.get(`/v2/students/${leadId}`).catch(() => ({ data: { data: null } }))
         ]);
 
         if (feeRes.data.data && feeRes.data.data.length > 0) {
@@ -34,9 +39,14 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
         if (payRes.data.data) {
           setPayments(payRes.data.data);
         }
+        if (studentRes.data.data) {
+          setFullStudentData(studentRes.data.data);
+        } else {
+          setFullStudentData(student); // fallback
+        }
       } catch (err) {
         console.error('Error fetching student details:', err);
-        showToast('Failed to fetch fee and payment history', 'error');
+        showToast('Failed to fetch student details', 'error');
       } finally {
         setLoading(false);
       }
@@ -62,19 +72,32 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
       if (uploadRes.data?.success) {
         const photoUrl = uploadRes.data.filePath;
 
-        // 2. Update the student's profile with the new photo URL
+        // 2. Update the student's or lead's profile with the new photo URL
         const studentId = student._id || student.id;
-        const updateRes = await API.put(`/v2/students/${studentId}`, {
-          media: {
-            ...student.media,
+        const isStudent = student.enrollment_number || student.student_id;
+        
+        let updateRes;
+        if (isStudent) {
+          updateRes = await API.put(`/v2/students/${studentId}`, {
+            media: {
+              ...student.media,
+              photo_url: photoUrl
+            }
+          });
+        } else {
+          updateRes = await API.put(`/leads/${studentId}`, {
             photo_url: photoUrl
-          }
-        });
+          });
+        }
 
         if (updateRes.data?.success) {
           // Update the local student object so the UI refreshes immediately
-          if (!student.media) student.media = {};
-          student.media.photo_url = photoUrl;
+          if (isStudent) {
+            if (!student.media) student.media = {};
+            student.media.photo_url = photoUrl;
+          } else {
+            student.photo_url = photoUrl;
+          }
           alert('Profile photo uploaded successfully! You can now print the ID card.');
         }
       }
@@ -101,13 +124,15 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
 
   if (!student) return null;
 
+  const displayStudent = fullStudentData || student;
+
   // Support both Lead schema (v1) and Student schema (v2)
-  const fullName = student.full_name || `${student.personal_info?.first_name || ''} ${student.personal_info?.last_name || ''}`.trim() || 'Unknown Student';
-  const phone = student.mobile_number || student.contact_info?.mobile_number || 'N/A';
-  const emailStr = student.email || student.contact_info?.email || 'N/A';
-  const cityStr = student.city || student.addresses?.current?.city || student.addresses?.permanent?.city || 'N/A';
-  const joinDate = new Date(student.submitted_at || student.createdAt || student.created_at || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  const courseIdStr = student.interestedCourse || student.interested_course_id?.course_name || student.department_id?.course_name || 'N/A';
+  const fullName = displayStudent.full_name || `${displayStudent.personal_info?.first_name || ''} ${displayStudent.personal_info?.last_name || ''}`.trim() || 'Unknown Student';
+  const phone = displayStudent.mobile_number || displayStudent.contact_info?.mobile_number || 'N/A';
+  const emailStr = displayStudent.email || displayStudent.contact_info?.email || 'N/A';
+  const cityStr = displayStudent.city || displayStudent.addresses?.current?.city || displayStudent.addresses?.permanent?.city || 'N/A';
+  const joinDate = new Date(displayStudent.submitted_at || displayStudent.createdAt || displayStudent.created_at || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const courseIdStr = displayStudent.interestedCourse || displayStudent.interested_course_id?.course_name || displayStudent.interested_course_id?.name || displayStudent.department_id?.course_name || displayStudent.department_id?.name || displayStudent.course?.course_name || 'N/A';
 
   return (
     <div className="animate-fade-in pb-12">
@@ -120,11 +145,11 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Student Profile</h1>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-sm text-muted-foreground">ID:</span>
-            <span className="text-sm font-semibold text-primary">{student.enrollment_number || student.student_id || student.id || student._id}</span>
+            <span className="text-sm font-semibold text-primary">{displayStudent.enrollment_number || displayStudent.student_id || displayStudent.id || displayStudent._id}</span>
           </div>
         </div>
         <div className="ml-auto flex gap-3">
-          <button className="btn btn-secondary gap-2 border-border shadow-sm" onClick={() => alert('Edit profile functionality coming soon!')}>
+          <button className="btn btn-secondary gap-2 border-border shadow-sm" onClick={() => setShowEditModal(true)}>
             <Edit className="w-4 h-4" /> Edit Profile
           </button>
           <button className="btn btn-secondary gap-2 border-border shadow-sm" onClick={() => setShowIdCard(true)}>
@@ -144,8 +169,8 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
             <div className="h-24 bg-gradient-to-r from-primary/80 to-accent"></div>
             <div className="px-6 pb-6 relative text-center">
               <div className="w-24 h-24 rounded-full bg-surface border-4 border-card text-primary flex items-center justify-center text-4xl font-bold shadow-md mx-auto -mt-12 mb-4 relative overflow-hidden">
-                {student.media?.photo_url || student.photo_url ? (
-                  <img src={`${getAssetUrl(student.media?.photo_url || student.photo_url)}?t=${Date.now()}`} alt={fullName} className="w-full h-full object-cover" />
+                {displayStudent.media?.photo_url || displayStudent.photo_url ? (
+                  <img src={`${getAssetUrl(displayStudent.media?.photo_url || displayStudent.photo_url)}?t=${Date.now()}`} alt={fullName} className="w-full h-full object-cover" />
                 ) : (
                   fullName.charAt(0).toUpperCase()
                 )}
@@ -154,8 +179,8 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
               <h2 className="text-xl font-bold text-foreground">{fullName}</h2>
               <p className="text-sm text-muted-foreground mb-4">Course: {courseIdStr}</p>
 
-              <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-6 border ${student.status === 'ACTIVE' || student.status === 'Enrolled' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-blue-200 bg-blue-50 text-blue-700'}`}>
-                {student.status || 'ACTIVE'}
+              <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-6 border ${displayStudent.status === 'ACTIVE' || displayStudent.status === 'Enrolled' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-blue-200 bg-blue-50 text-blue-700'}`}>
+                {displayStudent.status || 'ACTIVE'}
               </span>
 
               <div className="flex flex-col gap-3 text-left border-t border-border pt-6">
@@ -277,15 +302,15 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                         <div className="space-y-4">
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">Mobile</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{student.mobile_number || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.mobile_number || displayStudent.contact_info?.mobile_number || 'N/A'}</span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">Email</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{student.email || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.email || displayStudent.contact_info?.email || 'N/A'}</span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">City</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{student.city || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.city || displayStudent.addresses?.permanent?.city || 'N/A'}</span>
                           </div>
                         </div>
                       </div>
@@ -294,15 +319,15 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                         <div className="space-y-4">
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">Guardian Name</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{student.guardian_name || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.guardian_name || displayStudent.guardian?.name || displayStudent.emergency_contact?.name || 'N/A'}</span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">Relation</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{student.guardian_relation || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.guardian_relation || displayStudent.guardian?.relation || displayStudent.emergency_contact?.relationship || 'N/A'}</span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">Guardian Phone</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{student.guardian_phone || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.guardian_phone || displayStudent.guardian?.mobile || displayStudent.emergency_contact?.mobile_number || 'N/A'}</span>
                           </div>
                         </div>
                       </div>
@@ -312,14 +337,14 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                           <Briefcase className="w-8 h-8 text-primary/50" />
                           <div>
                             <p className="font-semibold text-foreground">Qualification</p>
-                            <p className="text-sm text-muted-foreground">{student.qualification || 'N/A'}</p>
+                            <p className="text-sm text-muted-foreground">{displayStudent.qualification || displayStudent.academic_history?.qualification || 'N/A'}</p>
                           </div>
                         </div>
                         <div className="bg-background border border-border rounded-lg p-4 flex gap-4 items-center">
                           <Bookmark className="w-8 h-8 text-primary/50" />
                           <div>
                             <p className="font-semibold text-foreground">Interested Course</p>
-                            <p className="text-sm text-muted-foreground">{student.interestedCourse || student.interested_course_id || 'N/A'}</p>
+                            <p className="text-sm text-muted-foreground">{courseIdStr}</p>
                           </div>
                         </div>
                       </div>
@@ -416,7 +441,7 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                       </div>
                     </div>
 
-                    {!student?.media?.photo_url && !student?.media?.aadhaar_url && !student?.media?.marksheet_url && !student?.media?.signature_url ? (
+                    {!displayStudent?.media?.photo_url && !displayStudent?.media?.aadhaar_url && !displayStudent?.media?.marksheet_url && !displayStudent?.media?.signature_url ? (
                       <div className="flex flex-col items-center justify-center h-[250px] bg-muted/30 border border-dashed border-border rounded-lg">
                         <Bookmark className="w-12 h-12 text-muted-foreground/30 mb-3" />
                         <p className="text-foreground font-medium">No documents uploaded yet</p>
@@ -425,10 +450,10 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                     ) : (
                       <div className="grid grid-cols-2 gap-4">
                         {[
-                          { label: 'Student Photo', url: student?.media?.photo_url },
-                          { label: 'Aadhaar Card', url: student?.media?.aadhaar_url },
-                          { label: 'Previous Marksheet', url: student?.media?.marksheet_url },
-                          { label: 'Signature', url: student?.media?.signature_url }
+                          { label: 'Student Photo', url: displayStudent?.media?.photo_url },
+                          { label: 'Aadhaar Card', url: displayStudent?.media?.aadhaar_url },
+                          { label: 'Previous Marksheet', url: displayStudent?.media?.marksheet_url },
+                          { label: 'Signature', url: displayStudent?.media?.signature_url }
                         ].map((doc, idx) => doc.url ? (
                           <div key={idx} className="flex items-center justify-between p-4 border border-border rounded-lg bg-surface">
                             <div className="flex items-center gap-3">
@@ -459,7 +484,18 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
       </div>
       
       {showIdCard && (
-        <StudentIdCard student={student} onClose={() => setShowIdCard(false)} />
+        <StudentIdCard student={displayStudent} onClose={() => setShowIdCard(false)} />
+      )}
+      
+      {showEditModal && (
+        <EditStudentModal 
+          student={displayStudent} 
+          onClose={() => setShowEditModal(false)}
+          onUpdate={(updatedData) => {
+             setFullStudentData(updatedData);
+             setShowEditModal(false);
+          }}
+        />
       )}
     </div>
   );
