@@ -132,8 +132,11 @@ const getLeads = async (req, res) => {
       query.interested_course_id = course;
     }
 
-    // Assigned Staff filter
-    if (assignedTo) {
+    // Assigned Staff filter / Role Enforcement
+    if (req.user && req.user.role && req.user.role.toLowerCase() !== 'admin') {
+      // Forcefully limit non-admins to only see leads assigned to them or unassigned leads
+      query.assigned_to_staff_id = { $in: [req.user.id, null] };
+    } else if (assignedTo) {
       if (assignedTo === 'me') {
         query.assigned_to_staff_id = req.user.id;
       } else if (assignedTo === 'unassigned') {

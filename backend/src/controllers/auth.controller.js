@@ -8,11 +8,10 @@ const User = require('../models/user.model');
 const Role = require('../models/role.model');
 const { logAudit } = require('../utils/auditLogger');
 
-// Generate JWT Helper
 const generateToken = (id) => {
   return jwt.sign(
     { id },
-    process.env.JWT_SECRET || 'YOUR_JWT_SUPER_SECRET_KEY',
+    process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
   );
 };
@@ -22,7 +21,7 @@ const generateToken = (id) => {
 // @access  Public (for seeding purposes initially)
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body; // Prevent clients from passing roleName
+    const { name, email, password, roleId } = req.body; // Allow roleId to be passed
 
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide all required fields (name, email, password)' });
@@ -34,11 +33,17 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    // Hardcode to an unprivileged role to prevent arbitrary Admin creation
-    const safeRoleName = 'Student';
-    let role = await Role.findOne({ name: safeRoleName });
+    let role;
+    if (req.user && req.user.role && req.user.role.toLowerCase() === 'admin' && roleId) {
+      // Admin is explicitly creating a specific role
+      role = await Role.findById(roleId);
+    } else {
+      // Default to unprivileged role for public signups or if no roleId is provided
+      role = await Role.findOne({ name: 'Student' });
+    }
+
     if (!role) {
-      return res.status(500).json({ success: false, message: 'Default role is missing from the system' });
+      return res.status(500).json({ success: false, message: 'Role is missing from the system or invalid' });
     }
 
     // Create user
