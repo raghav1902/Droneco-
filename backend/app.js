@@ -98,6 +98,7 @@ if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res, next) => {
     if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
       console.log(`[404 Fallthrough] ${req.originalUrl} not found`);
+      res.status(404);
       return next(new Error(`Not Found - ${req.originalUrl}`));
     }
     try {
