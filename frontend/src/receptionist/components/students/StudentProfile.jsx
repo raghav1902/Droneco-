@@ -65,9 +65,7 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
 
     try {
       // 1. Upload the file to the server
-      const uploadRes = await API.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' } // Let the browser set it with the correct boundary
-      });
+      const uploadRes = await API.post('/upload', formData);
 
       if (uploadRes.data?.success) {
         const photoUrl = uploadRes.data.filePath;

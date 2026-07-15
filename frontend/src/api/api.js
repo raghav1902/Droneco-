@@ -11,10 +11,7 @@ const baseURL = import.meta.env.VITE_API_URL || (isDev ? `http://localhost:5000/
 
 const API = axios.create({
   baseURL: baseURL,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  timeout: 30000
 });
 
 // Request Interceptor: Attach JWT Token if present in localStorage
