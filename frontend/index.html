@@ -13,8 +13,13 @@
           var savedTheme = localStorage.getItem('theme');
           if (savedTheme === 'dark') {
             document.documentElement.classList.add('dark');
-            document.body.classList.add('dark-theme', 'dark');
           }
+          // We must wait for body to be available to add classes to it
+          document.addEventListener('DOMContentLoaded', function() {
+            if (savedTheme === 'dark') {
+              document.body.classList.add('dark-theme', 'dark');
+            }
+          });
           window.addEventListener('load', function() {
             setTimeout(function() {
               document.documentElement.classList.remove('disable-transitions');

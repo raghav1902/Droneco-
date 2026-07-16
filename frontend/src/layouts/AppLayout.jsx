@@ -18,21 +18,25 @@ const AppLayout = ({ role, activeTab, setActiveTab, children }) => {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-      document.body.classList.add('dark-theme', 'dark');
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark-theme');
       setIsDark(true);
     } else {
-      document.body.classList.remove('dark-theme', 'dark');
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark-theme');
       setIsDark(false);
     }
   }, []);
 
   const handleToggleTheme = () => {
     if (isDark) {
-      document.body.classList.remove('dark-theme', 'dark');
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark-theme');
       localStorage.setItem('theme', 'light');
       setIsDark(false);
     } else {
-      document.body.classList.add('dark-theme', 'dark');
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark-theme');
       localStorage.setItem('theme', 'dark');
       setIsDark(true);
     }

@@ -26,9 +26,11 @@ const StudentForm = () => {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
       document.body.classList.add('dark-theme');
       setIsDark(true);
     } else {
+      document.documentElement.classList.remove('dark');
       document.body.classList.remove('dark-theme');
       setIsDark(false);
     }
@@ -36,10 +38,12 @@ const StudentForm = () => {
 
   const handleToggleTheme = () => {
     if (document.body.classList.contains('dark-theme')) {
+      document.documentElement.classList.remove('dark');
       document.body.classList.remove('dark-theme');
       localStorage.setItem('theme', 'light');
       setIsDark(false);
     } else {
+      document.documentElement.classList.add('dark');
       document.body.classList.add('dark-theme');
       localStorage.setItem('theme', 'dark');
       setIsDark(true);

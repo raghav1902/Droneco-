@@ -42,9 +42,11 @@ const App = () => {
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-      document.body.classList.add('dark-theme', 'dark');
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark-theme');
     } else {
-      document.body.classList.remove('dark-theme', 'dark');
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark-theme');
     }
   }, []);
 
