@@ -51,6 +51,7 @@ const Step1 = ({
             value={formData.dob}
             onChange={handleBasicChange}
           />
+          {validationErrors.dob && <span style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{validationErrors.dob}</span>}
         </div>
         
         <div className="form-group">

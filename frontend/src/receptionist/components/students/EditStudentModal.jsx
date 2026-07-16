@@ -62,6 +62,37 @@ const EditStudentModal = ({ student, onClose, onUpdate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validations
+    const isV2 = !!student.personal_info;
+    const phone = isV2 ? formData.contact_info?.mobile_number : formData.mobile_number;
+    const emailStr = isV2 ? formData.contact_info?.email : formData.email;
+    const dobStr = isV2 ? formData.personal_info?.dob : formData.dob;
+
+    if (phone && !/^[6-9]\d{9}$/.test(phone)) {
+      showToast('Invalid Mobile Number', 'error');
+      return;
+    }
+    
+    if (emailStr && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr)) {
+      showToast('Invalid Email Format', 'error');
+      return;
+    }
+
+    if (dobStr) {
+      const dobDate = new Date(dobStr);
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+      if (age < 15) {
+        showToast('Minimum age must be 15 years', 'error');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       const studentId = student.id || student._id || student.student_id;
@@ -110,8 +141,6 @@ const EditStudentModal = ({ student, onClose, onUpdate }) => {
                     <option value="ACTIVE">ACTIVE</option>
                     <option value="INACTIVE">INACTIVE</option>
                     <option value="Enrolled">Enrolled</option>
-                    <option value="Hot">Hot</option>
-                    <option value="Cold">Cold</option>
                   </select>
                 </div>
               </div>

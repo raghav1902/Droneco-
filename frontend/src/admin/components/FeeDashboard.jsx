@@ -114,45 +114,55 @@ const FeeDashboard = ({ setActiveTab }) => {
           </div>
         </div>
 
-        <div className="glass-card">
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>Recent Transactions</h3>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div className="glass-card overflow-hidden !p-0 flex flex-col">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700/50">
+            <h3 className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>Recent Transactions</h3>
+          </div>
+          <div className="overflow-x-auto custom-scrollbar flex-1">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  <th style={{ padding: '0.75rem 1rem' }}>TXN ID</th>
-                  <th style={{ padding: '0.75rem 1rem' }}>Student</th>
-                  <th style={{ padding: '0.75rem 1rem' }}>Amount</th>
-                  <th style={{ padding: '0.75rem 1rem' }}>Method</th>
-                  <th style={{ padding: '0.75rem 1rem' }}>Status</th>
+                <tr style={{ background: 'var(--bg-tertiary)' }}>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>TXN ID</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Student</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Amount</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Method</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Status</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
                 {data.recentTransactions.map(txn => (
-                  <tr key={txn.id} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
-                    <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem' }}>{txn.id}</td>
-                    <td style={{ padding: '0.75rem 1rem', fontWeight: 500 }}>{txn.studentName}</td>
-                    <td style={{ padding: '0.75rem 1rem', color: 'var(--text-main)' }}>₹{txn.amount}</td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
-                      <span style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>
+                  <tr key={txn.id} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                    <td className="py-4 px-6 font-mono text-xs" style={{ color: 'var(--text-muted)' }}>{txn.id}</td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-sm"
+                             style={{ background: 'var(--success-glow)', color: 'var(--success)' }}>
+                          {(txn.studentName || 'S').charAt(0).toUpperCase()}
+                        </div>
+                        <div className="font-bold text-sm" style={{ color: 'var(--text-main)' }}>{txn.studentName}</div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 font-bold text-sm" style={{ color: 'var(--text-main)' }}>₹{txn.amount?.toLocaleString()}</td>
+                    <td className="py-4 px-6">
+                      <span className="inline-flex px-2 py-1 rounded-md text-xs font-medium uppercase tracking-wider" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
                         {txn.method}
                       </span>
                     </td>
-                    <td style={{ padding: '0.75rem 1rem' }}>
+                    <td className="py-4 px-6">
                       <span className={`badge badge-${txn.status.toLowerCase()}`}>{txn.status}</span>
                     </td>
                   </tr>
                 ))}
                 {data.recentTransactions.length === 0 && (
                   <tr>
-                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No recent transactions.</td>
+                    <td colSpan="5" className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>No recent transactions.</td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-          <div style={{ marginTop: '1rem', textAlign: 'center' }}>
-            <button className="btn btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }} onClick={() => setActiveTab('payment-history')}>View All Transactions</button>
+          <div className="p-4 border-t border-slate-200 dark:border-slate-700/50 text-center bg-slate-50/50 dark:bg-slate-800/30">
+            <button className="btn btn-secondary text-sm px-6 py-2" onClick={() => setActiveTab('payment-history')}>View All Transactions</button>
           </div>
         </div>
       </div>

@@ -4,22 +4,22 @@ const createParentSchema = (role) => z.object({
   first_name: role === 'Mother' ? z.string().optional().or(z.literal('')) : z.string().min(1, `${role}'s First Name is required`),
   middle_name: z.string().optional(),
   last_name: role === 'Mother' ? z.string().optional().or(z.literal('')) : z.string().min(1, `${role}'s Last Name is required`),
-  mobile_number: role === 'Mother' 
-    ? z.string().regex(/^\d{10}$/, "Mobile number must be exactly 10 digits").optional().or(z.literal('')) 
-    : z.string().regex(/^\d{10}$/, "Mobile number must be exactly 10 digits"),
+  mobile_number: role === 'Mother'
+    ? z.string().regex(/^[6-9]\d{9}$/, "Mobile number must be exactly 10 digits and start with 6, 7, 8, or 9").optional().or(z.literal(''))
+    : z.string().regex(/^[6-9]\d{9}$/, "Mobile number must be exactly 10 digits and start with 6, 7, 8, or 9"),
   alt_mobile_number: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal('')),
   occupation: role === 'Father' ? z.string().min(1, "Father's Occupation is required") : z.string().optional(),
   organization: z.string().optional(),
   annual_income: z.union([
-    z.number(), 
-    z.string().regex(/^\d*$/, "Must be numeric").transform(val => val === '' ? undefined : Number(val)), 
+    z.number(),
+    z.string().regex(/^\d*$/, "Must be numeric").transform(val => val === '' ? undefined : Number(val)),
     z.literal('')
   ]).optional(),
   highest_qualification: z.string().optional()
 });
 
-const phoneRegex = /^\d{10}$/;
+const phoneRegex = /^[6-9]\d{9}$/;
 
 export const authLoginSchema = z.object({
   email: z.string().email("Invalid email format").min(1, "Email is required"),
@@ -51,7 +51,7 @@ export const createLeadSchema = z.object({
   mobile_number: z.string().optional(),
   city: z.string().optional(),
   filler_type: z.enum(['student', 'guardian']),
-  
+
   // Basic Info extensions
   middle_name: z.string().optional(),
   last_name: z.string().optional(),
@@ -127,7 +127,7 @@ export const createLeadSchema = z.object({
     middle_name: z.string().optional(),
     last_name: z.string().optional(),
     relationship: z.string().optional(),
-    mobile_number: z.string().regex(/^\d{10}$/, "Mobile number must be exactly 10 digits").optional().or(z.literal('')),
+    mobile_number: z.string().regex(/^[6-9]\d{9}$/, "Mobile number must be exactly 10 digits and start with 6, 7, 8, or 9").optional().or(z.literal('')),
     email: z.string().email("Invalid email").optional().or(z.literal('')),
     occupation: z.string().optional(),
     address: z.string().optional()
@@ -153,14 +153,27 @@ export const createLeadSchema = z.object({
 
 export const step1Schema = z.object({
   full_name: z.string().min(1, "Full name is required"),
+  dob: z.string().optional().or(z.literal('')),
   email: z.string().email("Invalid email format").optional().or(z.literal('')),
   mobile_number: z.string().optional().or(z.literal('')),
   city: z.string().min(1, "City is required"),
   filler_type: z.enum(['student', 'guardian']),
   guardian: z.any().optional()
 }).superRefine((data, ctx) => {
-  if (!data.mobile_number || !/^\d{10}$/.test(data.mobile_number)) {
-    ctx.addIssue({ path: ['mobile_number'], message: 'Phone number must be exactly 10 digits', code: z.ZodIssueCode.custom });
+  if (!data.mobile_number || !/^[6-9]\d{9}$/.test(data.mobile_number)) {
+    ctx.addIssue({ path: ['mobile_number'], message: 'Invalid Mobile Number', code: z.ZodIssueCode.custom });
+  }
+  if (data.dob) {
+    const dobDate = new Date(data.dob);
+    const today = new Date();
+    let age = today.getFullYear() - dobDate.getFullYear();
+    const m = today.getMonth() - dobDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+      age--;
+    }
+    if (age < 15) {
+      ctx.addIssue({ path: ['dob'], message: 'Minimum age must be 15 years', code: z.ZodIssueCode.custom });
+    }
   }
 });
 

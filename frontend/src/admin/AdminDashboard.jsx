@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, X } from 'lucide-react';
+import { Save, X, Edit, Power, BookOpen, HelpCircle } from 'lucide-react';
 import API from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import AppLayout from '../layouts/AppLayout';
@@ -364,39 +364,76 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            <div className="glass-card" style={{ padding: 0 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-tertiary)' }}>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Code</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Course Name</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Duration</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Total Fee</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Status</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {courses.map(course => (
-                    <tr key={course.id} style={{ borderBottom: '1px solid var(--border-color)', opacity: course.is_active ? 1 : 0.6 }}>
-                      <td style={{ padding: '1rem 1.5rem', fontWeight: 600, color: 'var(--accent-primary)' }}>{course.code}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        <div style={{ fontWeight: 500 }}>{course.course_name}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{course.description}</div>
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem' }}>{course.duration_months} M</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>₹{(course.fee_structure?.total_fee || 0).toLocaleString()} <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>({course.fee_structure?.installments_allowed ? 'Installments' : 'No Installments'})</span></td>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        <span className={`badge ${course.is_active ? 'badge-enrolled' : 'badge-not-interested'}`}>{course.is_active ? 'Active' : 'Inactive'}</span>
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right', gap: '0.5rem', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                        <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => handleEditCourse(course)}>Edit</button>
-                        <button className={`btn ${course.is_active ? 'btn-danger' : 'btn-secondary'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => handleToggleCourse(course.id)}>{course.is_active ? 'Deactivate' : 'Activate'}</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="glass-card overflow-hidden !p-0">
+              {courses.length === 0 ? (
+                <div className="p-16 flex flex-col items-center justify-center text-center">
+                  <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-slate-400">
+                    <BookOpen size={32} />
+                  </div>
+                  <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-main)' }}>No courses found</h3>
+                  <p style={{ color: 'var(--text-secondary)' }}>Add your first academic course above.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr style={{ background: 'var(--bg-tertiary)' }}>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Code</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Course Name</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Duration</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Total Fee</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Status</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider text-right" style={{ color: 'var(--text-muted)' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
+                      {courses.map(course => (
+                        <tr key={course.id} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30" style={{ opacity: course.is_active ? 1 : 0.6 }}>
+                          <td className="py-4 px-6 font-bold text-sm" style={{ color: 'var(--accent-primary)' }}>{course.code}</td>
+                          <td className="py-4 px-6">
+                            <div className="font-bold text-sm" style={{ color: 'var(--text-main)' }}>{course.course_name}</div>
+                            {course.description && <div className="text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--text-muted)' }}>{course.description}</div>}
+                          </td>
+                          <td className="py-4 px-6 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{course.duration_months} Months</td>
+                          <td className="py-4 px-6 text-sm font-medium" style={{ color: 'var(--text-main)' }}>
+                            ₹{(course.fee_structure?.total_fee || 0).toLocaleString()} 
+                            <span className="block text-xs font-normal mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                              {course.fee_structure?.installments_allowed ? 'Installments allowed' : 'No installments'}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className={course.is_active ? 'badge-enrolled' : 'badge-not-interested'}>{course.is_active ? 'Active' : 'Inactive'}</span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
+                                onClick={() => handleEditCourse(course)}
+                                title="Edit Course"
+                              >
+                                <Edit size={14} />
+                              </button>
+                              <button 
+                                className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                                style={{ 
+                                  background: course.is_active ? 'var(--danger-glow)' : 'var(--success-glow)', 
+                                  border: `1px solid ${course.is_active ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`, 
+                                  color: course.is_active ? 'var(--danger)' : 'var(--success)' 
+                                }}
+                                onClick={() => handleToggleCourse(course.id)}
+                                title={course.is_active ? 'Deactivate Course' : 'Activate Course'}
+                              >
+                                <Power size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -461,39 +498,71 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            <div className="glass-card" style={{ padding: 0 }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-tertiary)' }}>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Step</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Question Text</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Type</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Required</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>Status</th>
-                    <th style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {questions.map(q => (
-                    <tr key={q.id} style={{ borderBottom: '1px solid var(--border-color)', opacity: q.is_active ? 1 : 0.6 }}>
-                      <td style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>Step {q.order}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        <div style={{ fontWeight: 500 }}>{q.question_text}</div>
-                        {q.options && q.options.length > 0 && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Options: {q.options.join(', ')}</div>}
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', textTransform: 'capitalize' }}>{q.type}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>{q.is_required ? 'Yes' : 'No'}</td>
-                      <td style={{ padding: '1rem 1.5rem' }}>
-                        <span className={`badge ${q.is_active ? 'badge-enrolled' : 'badge-not-interested'}`}>{q.is_active ? 'Active' : 'Inactive'}</span>
-                      </td>
-                      <td style={{ padding: '1rem 1.5rem', textAlign: 'right', gap: '0.5rem', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                        <button className="btn btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => handleEditQuestion(q)}>Edit</button>
-                        <button className={`btn ${q.is_active ? 'btn-danger' : 'btn-secondary'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => handleToggleQuestion(q.id)}>{q.is_active ? 'Deactivate' : 'Activate'}</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="glass-card overflow-hidden !p-0">
+              {questions.length === 0 ? (
+                <div className="p-16 flex flex-col items-center justify-center text-center">
+                  <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-slate-400">
+                    <HelpCircle size={32} />
+                  </div>
+                  <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--text-main)' }}>No questions found</h3>
+                  <p style={{ color: 'var(--text-secondary)' }}>Create your first custom field above.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr style={{ background: 'var(--bg-tertiary)' }}>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Step</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Question Text</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Type</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Required</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Status</th>
+                        <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider text-right" style={{ color: 'var(--text-muted)' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
+                      {questions.map(q => (
+                        <tr key={q.id} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30" style={{ opacity: q.is_active ? 1 : 0.6 }}>
+                          <td className="py-4 px-6 font-bold text-sm" style={{ color: 'var(--accent-primary)' }}>Step {q.order}</td>
+                          <td className="py-4 px-6">
+                            <div className="font-bold text-sm" style={{ color: 'var(--text-main)' }}>{q.question_text}</div>
+                            {q.options && q.options.length > 0 && <div className="text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--text-muted)' }}>Options: {q.options.join(', ')}</div>}
+                          </td>
+                          <td className="py-4 px-6 text-sm font-medium capitalize" style={{ color: 'var(--text-secondary)' }}>{q.type}</td>
+                          <td className="py-4 px-6 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{q.is_required ? 'Yes' : 'No'}</td>
+                          <td className="py-4 px-6">
+                            <span className={q.is_active ? 'badge-enrolled' : 'badge-not-interested'}>{q.is_active ? 'Active' : 'Inactive'}</span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
+                                onClick={() => handleEditQuestion(q)}
+                                title="Edit Question"
+                              >
+                                <Edit size={14} />
+                              </button>
+                              <button 
+                                className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                                style={{ 
+                                  background: q.is_active ? 'var(--danger-glow)' : 'var(--success-glow)', 
+                                  border: `1px solid ${q.is_active ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`, 
+                                  color: q.is_active ? 'var(--danger)' : 'var(--success)' 
+                                }}
+                                onClick={() => handleToggleQuestion(q.id)}
+                                title={q.is_active ? 'Deactivate Question' : 'Activate Question'}
+                              >
+                                <Power size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

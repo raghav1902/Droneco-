@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, AlertCircle, CreditCard, Bell } from 'lucide-react';
+import { Search, AlertCircle, CreditCard, Bell, User } from 'lucide-react';
 import { showToast } from '../../utils/toast.js';
 import API from '../../api/api.js';
 
@@ -29,7 +29,6 @@ const DueList = ({ onCollectFee }) => {
 
   const handleCollectFee = (fee) => {
     if (onCollectFee) {
-      // Pass the lead as the student for CollectFee component
       const student = {
         id: fee.lead_id?._id || fee.lead_id?.id,
         name: fee.lead_id?.full_name,
@@ -41,37 +40,41 @@ const DueList = ({ onCollectFee }) => {
     }
   };
 
+  const getInitials = (name) => {
+    if (!name) return 'S';
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
   return (
-    <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+    <div className="animate-fade-in pb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Due List</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>Students with pending fee payments.</p>
+          <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-main)' }}>Due List</h2>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Students with pending fee payments.</p>
         </div>
         {filteredDues.length > 0 && (
-          <div style={{ background: 'var(--danger-glow, rgba(239,68,68,0.1))', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px', padding: '0.5rem 1rem', fontSize: '0.85rem', color: 'var(--danger, #ef4444)', fontWeight: 600 }}>
-            ₹{filteredDues.reduce((sum, f) => sum + (f.due_amount || 0), 0).toLocaleString()} total dues
+          <div className="px-4 py-2 rounded-lg font-bold text-sm shadow-sm" style={{ background: 'var(--danger-glow)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--danger)' }}>
+            ₹{filteredDues.reduce((sum, f) => sum + (f.due_amount || 0), 0).toLocaleString()} Total Dues
           </div>
         )}
       </div>
 
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '1rem' }}>
-          <div style={{ position: 'relative' }}>
-            <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+      <div className="glass-card mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative group">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-600 transition-colors" />
             <input
               type="text"
-              className="form-input"
+              className="form-input pl-10"
               placeholder="Search by student name..."
-              style={{ paddingLeft: '2.5rem' }}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select className="form-select">
+          <select className="form-select font-medium">
             <option value="All">All Classes</option>
           </select>
-          <select className="form-select">
+          <select className="form-select font-medium">
             <option value="All">All Statuses</option>
             <option value="Overdue">Overdue</option>
             <option value="Pending">Pending</option>
@@ -79,77 +82,91 @@ const DueList = ({ onCollectFee }) => {
         </div>
       </div>
 
-      <div className="glass-card" style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Student ID</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Name</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Class / Course</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Paid</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Due Amount</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Fee</th>
-              <th style={{ padding: '1rem 1.5rem', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="7" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</td></tr>
-            ) : filteredDues.map((fee) => (
-              <tr key={fee.id || fee._id} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
-                <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                  {(fee.lead_id?._id || '').substring(0, 8)}…
-                </td>
-                <td style={{ padding: '1rem 1.5rem', fontWeight: 500 }}>
-                  {fee.lead_id?.full_name || 'Unknown'}
-                  <AlertCircle size={14} style={{ display: 'inline', marginLeft: '0.5rem', color: 'var(--danger, #ef4444)' }} />
-                  {fee.lead_id?.mobile_number && (
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{fee.lead_id.mobile_number}</div>
-                  )}
-                </td>
-                <td style={{ padding: '1rem 1.5rem' }}>
-                  <div style={{ fontSize: '0.9rem' }}>{fee.course_id?.course_name || 'N/A'}</div>
-                </td>
-                <td style={{ padding: '1rem 1.5rem', color: 'var(--success, #10b981)', fontWeight: 600 }}>
-                  ₹{(fee.paid_amount || 0).toLocaleString()}
-                </td>
-                <td style={{ padding: '1rem 1.5rem', fontWeight: 700, color: 'var(--warning, #f59e0b)' }}>
-                  ₹{fee.due_amount?.toLocaleString()}
-                </td>
-                <td style={{ padding: '1rem 1.5rem', color: 'var(--text-main)' }}>
-                  ₹{fee.net_payable?.toLocaleString()}
-                </td>
-                <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                    <button
-                      className="btn btn-secondary"
-                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                      onClick={() => showToast(`Reminder noted for ${fee.lead_id?.full_name}`, 'info')}
-                      title="Send Reminder"
-                    >
-                      <Bell size={13} /> Remind
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
-                      onClick={() => handleCollectFee(fee)}
-                      title="Collect Fee"
-                    >
-                      <CreditCard size={13} /> Collect Fee
-                    </button>
-                  </div>
-                </td>
+      <div className="glass-card overflow-hidden !p-0">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr style={{ background: 'var(--bg-tertiary)' }}>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Student ID</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Name</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Course</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Paid</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Due Amount</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider text-right" style={{ color: 'var(--text-muted)' }}>Actions</th>
               </tr>
-            ))}
-            {!loading && filteredDues.length === 0 && (
-              <tr>
-                <td colSpan="7" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  🎉 No pending dues — all fees are up to date!
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
+              {loading ? (
+                <tr><td colSpan="6" className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>Loading...</td></tr>
+              ) : filteredDues.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="py-16 text-center">
+                    <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4" style={{ background: 'var(--success-glow)', color: 'var(--success)' }}>
+                      <CheckCircle size={32} />
+                    </div>
+                    <div className="font-bold text-lg" style={{ color: 'var(--text-main)' }}>All Clear!</div>
+                    <div className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>No pending dues — all fees are up to date.</div>
+                  </td>
+                </tr>
+              ) : filteredDues.map((fee) => (
+                <tr key={fee.id || fee._id} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                  <td className="py-4 px-6 font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    {(fee.lead_id?._id || '').substring(0, 8)}…
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm"
+                           style={{ background: 'var(--danger-glow)', color: 'var(--danger)' }}>
+                        {getInitials(fee.lead_id?.full_name)}
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm flex items-center gap-1.5" style={{ color: 'var(--text-main)' }}>
+                          {fee.lead_id?.full_name || 'Unknown'}
+                          <AlertCircle size={14} style={{ color: 'var(--danger)' }} />
+                        </div>
+                        {fee.lead_id?.mobile_number && (
+                          <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{fee.lead_id.mobile_number}</div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                    {fee.course_id?.course_name || 'N/A'}
+                  </td>
+                  <td className="py-4 px-6 font-bold" style={{ color: 'var(--success)' }}>
+                    ₹{(fee.paid_amount || 0).toLocaleString()}
+                  </td>
+                  <td className="py-4 px-6 font-bold" style={{ color: 'var(--danger)' }}>
+                    ₹{fee.due_amount?.toLocaleString()}
+                    <div className="text-xs font-normal mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      of ₹{fee.net_payable?.toLocaleString()}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
+                        onClick={() => showToast(`Reminder noted for ${fee.lead_id?.full_name}`, 'info')}
+                        title="Send Reminder"
+                      >
+                        <Bell size={14} />
+                      </button>
+                      <button
+                        className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                        style={{ background: 'var(--accent-glow)', border: '1px solid var(--accent-hex)', color: 'var(--accent-hex)' }}
+                        onClick={() => handleCollectFee(fee)}
+                        title="Collect Fee"
+                      >
+                        <CreditCard size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

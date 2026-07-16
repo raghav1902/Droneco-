@@ -215,14 +215,14 @@ const StudentForm = () => {
       if (!formData.guardian.first_name) errors['guardian.first_name'] = 'Name is required';
       if (!formData.guardian.email) errors['guardian.email'] = 'Email is required';
       if (!formData.guardian.mobile_number) errors['guardian.mobile_number'] = 'Mobile number is required';
-      else if (!/^\d{10}$/.test(formData.guardian.mobile_number)) errors['guardian.mobile_number'] = 'Must be exactly 10 digits';
+      else if (!/^[6-9]\d{9}$/.test(formData.guardian.mobile_number)) errors['guardian.mobile_number'] = 'Must be exactly 10 digits and start with 6, 7, 8, or 9';
     }
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return { isValid: false, errors };
     }
-    
+
     setValidationErrors({});
     return { isValid: true };
   };
@@ -301,7 +301,7 @@ const StudentForm = () => {
       if (payload.father && !payload.father.first_name) delete payload.father;
       if (payload.mother && !payload.mother.first_name) delete payload.mother;
       if (payload.guardian && !payload.guardian.first_name) delete payload.guardian;
-      
+
       // Remove other empty objects if needed
       if (payload.permanent_address && !payload.permanent_address.house_no) delete payload.permanent_address;
       if (payload.current_address && !payload.current_address.house_no) delete payload.current_address;
@@ -357,7 +357,7 @@ const StudentForm = () => {
 
   return (
     <div className="wizard-layout" style={{ position: 'relative' }}>
-      <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', zIndex: 10 }}>
+      <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', zIndex: 10, display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <button
           onClick={handleToggleTheme}
           style={{

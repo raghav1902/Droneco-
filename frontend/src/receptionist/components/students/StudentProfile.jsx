@@ -308,7 +308,7 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                           </div>
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">City</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.city || displayStudent.addresses?.permanent?.city || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.city || displayStudent.current_address?.city || displayStudent.permanent_address?.city || displayStudent.addresses?.permanent?.city || 'N/A'}</span>
                           </div>
                         </div>
                       </div>
@@ -317,15 +317,23 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                         <div className="space-y-4">
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">Guardian Name</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.guardian_name || displayStudent.guardian?.name || displayStudent.emergency_contact?.name || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">
+                              {displayStudent.guardian?.first_name 
+                                ? `${displayStudent.guardian.first_name} ${displayStudent.guardian.last_name || ''}`.trim() 
+                                : displayStudent.guardian_name || displayStudent.guardian?.name || displayStudent.emergency_contact?.name || 'N/A'}
+                            </span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">Relation</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.guardian_relation || displayStudent.guardian?.relation || displayStudent.emergency_contact?.relationship || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">
+                              {displayStudent.guardian?.relationship || displayStudent.guardian_relation || displayStudent.guardian?.relation || displayStudent.emergency_contact?.relationship || 'N/A'}
+                            </span>
                           </div>
                           <div className="grid grid-cols-3 gap-2 border-b border-border/50 pb-3">
                             <span className="text-sm text-muted-foreground">Guardian Phone</span>
-                            <span className="text-sm font-medium text-foreground col-span-2">{displayStudent.guardian_phone || displayStudent.guardian?.mobile || displayStudent.emergency_contact?.mobile_number || 'N/A'}</span>
+                            <span className="text-sm font-medium text-foreground col-span-2">
+                              {displayStudent.guardian?.mobile_number || displayStudent.guardian_phone || displayStudent.guardian?.mobile || displayStudent.emergency_contact?.mobile_number || 'N/A'}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -335,7 +343,9 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                           <Briefcase className="w-8 h-8 text-primary/50" />
                           <div>
                             <p className="font-semibold text-foreground">Qualification</p>
-                            <p className="text-sm text-muted-foreground">{displayStudent.qualification || displayStudent.academic_history?.qualification || 'N/A'}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {displayStudent.highest_qualification || displayStudent.previous_qualification?.school_college_name || displayStudent.qualification || displayStudent.academic_history?.qualification || 'N/A'}
+                            </p>
                           </div>
                         </div>
                         <div className="bg-background border border-border rounded-lg p-4 flex gap-4 items-center">
@@ -429,7 +439,7 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                           style={{ display: 'none' }} 
                         />
                         <button 
-                          className="btn btn-secondary btn-sm flex items-center gap-2" 
+                          className="btn btn-secondary btn-sm flex items-center gap-2 shadow-sm" 
                           onClick={() => fileInputRef.current?.click()}
                           disabled={isUploading}
                         >
@@ -439,28 +449,52 @@ const StudentProfile = ({ student, onBack, onCollectFee }) => {
                       </div>
                     </div>
 
-                    {!displayStudent?.media?.photo_url && !displayStudent?.media?.aadhaar_url && !displayStudent?.media?.marksheet_url && !displayStudent?.media?.signature_url ? (
-                      <div className="flex flex-col items-center justify-center h-[250px] bg-muted/30 border border-dashed border-border rounded-lg">
-                        <Bookmark className="w-12 h-12 text-muted-foreground/30 mb-3" />
-                        <p className="text-foreground font-medium">No documents uploaded yet</p>
-                        <p className="text-sm text-muted-foreground mb-4">Files like photos and ID cards will appear here.</p>
+                    {!displayStudent?.media?.photo_url && !displayStudent?.media?.aadhaar_url && !displayStudent?.media?.marksheet_url && !displayStudent?.media?.signature_url && !displayStudent?.photo_url && !displayStudent?.documents?.photo ? (
+                      <div className="flex flex-col items-center justify-center h-[250px] bg-muted/10 border-2 border-dashed border-border rounded-xl">
+                        <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
+                          <FileText className="w-8 h-8" />
+                        </div>
+                        <h4 className="text-lg font-semibold text-foreground mb-1">No Documents Uploaded</h4>
+                        <p className="text-muted-foreground text-sm max-w-sm text-center mb-6">Upload photos or important documents to keep the student record complete.</p>
+                        <button className="btn btn-primary shadow-sm" onClick={() => fileInputRef.current?.click()}>
+                          <Upload className="w-4 h-4 mr-2" /> Upload Document
+                        </button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[
-                          { label: 'Student Photo', url: displayStudent?.media?.photo_url },
-                          { label: 'Aadhaar Card', url: displayStudent?.media?.aadhaar_url },
-                          { label: 'Previous Marksheet', url: displayStudent?.media?.marksheet_url },
-                          { label: 'Signature', url: displayStudent?.media?.signature_url }
+                          { label: 'Student Photo', url: displayStudent?.media?.photo_url || displayStudent?.photo_url || displayStudent?.documents?.photo },
+                          { label: 'Aadhaar Card', url: displayStudent?.media?.aadhaar_url || displayStudent?.documents?.aadhaar },
+                          { label: 'Previous Marksheet', url: displayStudent?.media?.marksheet_url || displayStudent?.documents?.marksheet },
+                          { label: 'Signature', url: displayStudent?.media?.signature_url || displayStudent?.documents?.signature }
                         ].map((doc, idx) => doc.url ? (
-                          <div key={idx} className="flex items-center justify-between p-4 border border-border rounded-lg bg-surface">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-primary/10 rounded flex items-center justify-center">
-                                <FileText className="w-5 h-5 text-primary" />
+                          <div key={idx} className="group relative rounded-xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-all">
+                            <div className="aspect-square bg-muted/30 flex items-center justify-center p-4">
+                              <img 
+                                src={getAssetUrl(doc.url)} 
+                                alt={doc.label} 
+                                className="w-full h-full object-contain rounded-lg drop-shadow-sm"
+                                onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
+                              />
+                              <div className="hidden text-muted-foreground font-medium text-sm text-center">
+                                Document Available<br/>(Not an Image)
                               </div>
-                              <span className="font-medium text-foreground">{doc.label}</span>
                             </div>
-                            <a href={getAssetUrl(doc.url)} target="_blank" rel="noreferrer" className="text-primary hover:underline text-sm font-medium">View File</a>
+                            <div className="p-4 bg-background border-t border-border flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-primary" />
+                                <span className="font-semibold text-sm text-foreground">{doc.label}</span>
+                              </div>
+                              <a
+                                href={getAssetUrl(doc.url)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"
+                                title="View Document"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                              </a>
+                            </div>
                           </div>
                         ) : null)}
                       </div>

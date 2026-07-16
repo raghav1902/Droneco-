@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { Sun, Moon } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import LandingPage from './pages/LandingPage';
 import StudentForm from './forms/StudentForm';
 import Login from './pages/auth/Login';
 import logo from './assets/Droneco.jpg';
@@ -38,14 +39,26 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 const App = () => {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-theme', 'dark');
+    } else {
+      document.body.classList.remove('dark-theme', 'dark');
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <div className="app-container">
           <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Routes>
+              {/* Professional Landing Page */}
+              <Route path="/" element={<LandingPage />} />
+
               {/* Public Student Wizard Form */}
-              <Route path="/" element={<StudentForm />} />
+              <Route path="/apply" element={<StudentForm />} />
 
               {/* Staff Login */}
               <Route path="/login" element={<Login />} />

@@ -160,32 +160,47 @@ const FormConfigSettings = ({ settings, setSettings, onSave }) => {
       </div>
 
       {(settings.customFields?.length > 0) && (
-        <div className="glass-card" style={{ padding: '2rem', marginBottom: '2rem' }}>
-          <h4 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Configured Custom Fields</h4>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '0.5rem' }}>Label</th>
-                <th style={{ padding: '0.5rem' }}>Type</th>
-                <th style={{ padding: '0.5rem' }}>Step</th>
-                <th style={{ padding: '0.5rem' }}>Required</th>
-                <th style={{ padding: '0.5rem' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {settings.customFields.map((field, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '0.5rem' }}>{field.label}</td>
-                  <td style={{ padding: '0.5rem', textTransform: 'capitalize' }}>{field.type}</td>
-                  <td style={{ padding: '0.5rem' }}>{field.step}</td>
-                  <td style={{ padding: '0.5rem' }}>{field.required ? 'Yes' : 'No'}</td>
-                  <td style={{ padding: '0.5rem' }}>
-                    <button className="btn btn-secondary" style={{ padding: '0.3rem', color: 'var(--danger)' }} onClick={() => handleRemoveCustomField(index)}><Trash2 size={14} /></button>
-                  </td>
+        <div className="glass-card overflow-hidden !p-0 mb-8">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-700/50">
+            <h4 className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>Configured Custom Fields</h4>
+          </div>
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr style={{ background: 'var(--bg-tertiary)' }}>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Label</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Type</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Step</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Required</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider text-right" style={{ color: 'var(--text-muted)' }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
+                {settings.customFields.map((field, index) => (
+                  <tr key={index} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                    <td className="py-4 px-6 font-bold text-sm" style={{ color: 'var(--text-main)' }}>{field.label}</td>
+                    <td className="py-4 px-6 text-sm font-medium capitalize" style={{ color: 'var(--text-secondary)' }}>{field.type}</td>
+                    <td className="py-4 px-6 text-sm" style={{ color: 'var(--text-secondary)' }}>{field.step}</td>
+                    <td className="py-4 px-6">
+                      <span className={field.required ? 'badge-enrolled' : 'badge-not-interested'}>{field.required ? 'Yes' : 'No'}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                          style={{ background: 'var(--danger-glow)', border: '1px solid rgba(239, 68, 68, 0.2)', color: 'var(--danger)' }}
+                          onClick={() => handleRemoveCustomField(index)}
+                          title="Remove Field"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -331,42 +346,77 @@ const UserManagement = () => {
       {loading ? (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading users...</div>
       ) : (
-        <div className="glass-card" style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)' }}>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Name</th>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Email</th>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Role</th>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Status</th>
-                <th style={{ padding: '1rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user.id} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
-                  <td style={{ padding: '1rem', fontWeight: 500 }}>{user.name}</td>
-                  <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{user.email}</td>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{ fontSize: '0.85rem', padding: '0.2rem 0.5rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>{user.role?.name || user.role}</span>
-                  </td>
-                  <td style={{ padding: '1rem' }}>
-                    <span className={`badge ${user.status === 'active' ? 'badge-success' : 'badge-secondary'}`}>{user.status}</span>
-                  </td>
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
-                    <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginRight: '0.5rem' }} title="Reset Password" onClick={() => handleOpenReset(user)}><Key size={14} /></button>
-                    <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginRight: '0.5rem' }} onClick={() => handleOpenEdit(user)}><Edit2 size={14} /></button>
-                    <button className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', color: 'var(--danger)' }} onClick={() => handleDelete(user)}><Trash2 size={14} /></button>
-                  </td>
+        <div className="glass-card overflow-hidden !p-0">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr style={{ background: 'var(--bg-tertiary)' }}>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Name</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Email</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Role</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Status</th>
+                  <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider text-right" style={{ color: 'var(--text-muted)' }}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
+                {users.map(user => (
+                  <tr key={user.id} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-sm"
+                             style={{ background: 'var(--accent-glow)', color: 'var(--accent-hex)' }}>
+                          {(user.name || 'U').charAt(0).toUpperCase()}
+                        </div>
+                        <div className="font-bold text-sm" style={{ color: 'var(--text-main)' }}>{user.name}</div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 text-sm" style={{ color: 'var(--text-secondary)' }}>{user.email}</td>
+                    <td className="py-4 px-6">
+                      <span className="inline-flex px-2 py-1 rounded-md text-xs font-medium uppercase tracking-wider" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
+                        {user.role?.name || user.role}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className={user.status === 'active' ? 'badge-enrolled' : 'badge-not-interested'}>{user.status}</span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
+                          onClick={() => handleOpenReset(user)}
+                          title="Reset Password"
+                        >
+                          <Key size={14} />
+                        </button>
+                        <button 
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', color: 'var(--text-main)' }}
+                          onClick={() => handleOpenEdit(user)}
+                          title="Edit User"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button 
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-sm"
+                          style={{ background: 'var(--danger-glow)', border: '1px solid rgba(239, 68, 68, 0.2)', color: 'var(--danger)' }}
+                          onClick={() => handleDelete(user)}
+                          title="Delete User"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', padding: '1rem', borderTop: '1px solid var(--border)' }}>
-              <button className="btn btn-secondary" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</button>
-              <span style={{ display: 'flex', alignItems: 'center' }}>Page {page} of {totalPages}</span>
-              <button className="btn btn-secondary" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</button>
+            <div className="flex justify-center items-center gap-4 mt-6 mb-6">
+              <button className="btn btn-secondary text-sm px-4 py-2" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</button>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
+              <button className="btn btn-secondary text-sm px-4 py-2" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</button>
             </div>
           )}
         </div>
@@ -545,49 +595,51 @@ const AuditLogs = () => {
   return (
   <div className="animate-fade-in">
     <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Audit Logs</h3>
-    <div className="glass-card" style={{ overflowX: 'auto' }}>
+    <div className="glass-card overflow-hidden !p-0">
+      <div className="overflow-x-auto custom-scrollbar">
       {loading ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading audit logs...</div>
+        <div className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>Loading audit logs...</div>
       ) : (
         <>
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <table className="w-full text-left border-collapse">
         <thead>
-          <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)' }}>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Timestamp</th>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>User</th>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Action</th>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>Details</th>
-            <th style={{ padding: '1rem', color: 'var(--text-secondary)' }}>IP Address</th>
+          <tr style={{ background: 'var(--bg-tertiary)' }}>
+            <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Timestamp</th>
+            <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>User</th>
+            <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Action</th>
+            <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Details</th>
+            <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>IP Address</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
           {logs.map(log => (
-            <tr key={log.id} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
-              <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{new Date(log.time).toLocaleString()}</td>
-              <td style={{ padding: '1rem', fontWeight: 500 }}>{log.user}</td>
-              <td style={{ padding: '1rem' }}>
-                <span style={{ fontSize: '0.85rem', padding: '0.2rem 0.5rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>{log.action}</span>
+            <tr key={log.id} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+              <td className="py-4 px-6 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{new Date(log.time).toLocaleString()}</td>
+              <td className="py-4 px-6 font-bold text-sm" style={{ color: 'var(--text-main)' }}>{log.user}</td>
+              <td className="py-4 px-6">
+                <span className="inline-flex px-2 py-1 rounded-md text-xs font-medium uppercase tracking-wider" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>{log.action}</span>
               </td>
-              <td style={{ padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{log.details}</td>
-              <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>{log.ip}</td>
+              <td className="py-4 px-6 text-sm" style={{ color: 'var(--text-secondary)' }}>{log.details}</td>
+              <td className="py-4 px-6 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{log.ip}</td>
             </tr>
           ))}
           {logs.length === 0 && (
             <tr>
-              <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No logs available.</td>
+              <td colSpan="5" className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>No logs available.</td>
             </tr>
           )}
         </tbody>
       </table>
       {totalPages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', padding: '1rem', borderTop: '1px solid var(--border)' }}>
-          <button className="btn btn-secondary" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</button>
-          <span style={{ display: 'flex', alignItems: 'center' }}>Page {page} of {totalPages}</span>
-          <button className="btn btn-secondary" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</button>
+        <div className="flex justify-center items-center gap-4 mt-6 mb-6">
+          <button className="btn btn-secondary text-sm px-4 py-2" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</button>
+          <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
+          <button className="btn btn-secondary text-sm px-4 py-2" disabled={page === totalPages} onClick={() => setPage(p => p + 1)}>Next</button>
         </div>
       )}
       </>
       )}
+      </div>
     </div>
   </div>
 )};

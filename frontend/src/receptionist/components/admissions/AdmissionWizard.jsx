@@ -4,9 +4,10 @@ import { showToast } from '../../../utils/toast.js';
 import { admissionSchema, validateForm } from '../../../utils/validators.js';
 import API from '../../../api/api.js';
 import StudentIdCard from '../students/StudentIdCard';
+import ReceiptPage from '../ReceiptPage';
 import {
   CheckCircle, User, FileText, UploadCloud,
-  CreditCard, ShieldCheck, ChevronRight, ChevronLeft, Printer, Home, X, Check, Image as ImageIcon, File, Eye, Zap
+  CreditCard, ShieldCheck, ChevronRight, ChevronLeft, Printer, Home, X, Check, Image as ImageIcon, File, Eye, Zap, AlertCircle
 } from 'lucide-react';
 
 const steps = [
@@ -60,8 +61,11 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitLock = React.useRef(false);
   const [uploadProgress, setUploadProgress] = useState({});
+  const [validationErrors, setValidationErrors] = useState({});
 
   const [showIdCard, setShowIdCard] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [transaction, setTransaction] = useState(null);
   const toTitleCase = (str) => {
     if (!str || typeof str !== 'string') return str;
     return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -108,18 +112,55 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
   }, [totalPayable]);
 
   const handleNextStep = () => {
+    let errors = {};
     if (currentStep === 1) {
-      if (!formData.studentName || !formData.phone || !formData.courseSelected) {
-        showToast('Please fill all mandatory fields (Name, Course, Phone)', 'error');
+      if (!formData.studentName) errors.studentName = 'Student Name is required';
+      if (!formData.courseSelected) errors.courseSelected = 'Course is required';
+      if (!formData.phone) {
+        errors.phone = 'Phone Number is required';
+      } else if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+        errors.phone = 'Enter valid phone number';
+      }
+      if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        errors.email = 'Invalid email address';
+      }
+      
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
         return;
       }
     }
     if (currentStep === 2) {
-      if (!formData.dob || !formData.gender || !formData.bloodGroup || !formData.emergencyContact || !formData.batch) {
-        showToast('Please fill all mandatory student details', 'error');
+      if (!formData.dob) {
+        errors.dob = 'Date of Birth is required';
+      } else {
+        const dobDate = new Date(formData.dob);
+        const today = new Date();
+        let age = today.getFullYear() - dobDate.getFullYear();
+        const m = today.getMonth() - dobDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+            age--;
+        }
+        if (age < 15) {
+            errors.dob = 'Minimum age must be 15 years';
+        }
+      }
+      if (!formData.gender) errors.gender = 'Gender is required';
+      if (!formData.bloodGroup) errors.bloodGroup = 'Blood Group is required';
+      if (!formData.emergencyContact) {
+        errors.emergencyContact = 'Emergency Contact is required';
+      } else if (!/^[6-9]\d{9}$/.test(formData.emergencyContact)) {
+        errors.emergencyContact = 'Enter valid phone number';
+      }
+      if (!formData.batch) errors.batch = 'Batch is required';
+
+      if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
         return;
       }
     }
+    
+    setValidationErrors({});
     setCurrentStep(prev => Math.min(prev + 1, 6));
   };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
@@ -135,6 +176,9 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
     }
     
     setFormData(prev => ({ ...prev, [name]: formattedValue }));
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: null }));
+    }
   };
 
   const handleResponseChange = (questionId, value) => {
@@ -236,12 +280,15 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
       // Record Initial Payment if any amount was collected
       const collectedAmount = Number(formData.amountCollected);
       if (!isNaN(collectedAmount) && collectedAmount > 0) {
-        await API.post('/payments', {
+        const paymentRes = await API.post('/payments', {
           fee_id: feeId,
           amount_paid: collectedAmount,
           payment_method: formData.paymentMethod,
           remarks: 'Initial Admission Payment'
         });
+        if (paymentRes.data?.data) {
+          setTransaction(paymentRes.data.data);
+        }
       }
 
       // Admit Student: Creates Student, Parent, updates Lead, and links Fee/Payment
@@ -270,23 +317,27 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
             <h3 className="text-xl font-semibold mb-6 text-foreground">Verify Lead Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="form-group mb-0">
-                <label className="form-label">Student Name</label>
-                <input type="text" className="form-input bg-muted" name="studentName" value={formData.studentName} onChange={handleChange} />
+                <label className="form-label">Student Name <span className="text-destructive">*</span></label>
+                <input type="text" className={`form-input bg-muted ${validationErrors.studentName ? 'border-destructive focus:ring-destructive' : ''}`} name="studentName" value={formData.studentName} onChange={handleChange} />
+                {validationErrors.studentName && <span className="text-sm text-destructive mt-1 block">{validationErrors.studentName}</span>}
               </div>
               <div className="form-group mb-0">
-                <label className="form-label">Course Selected</label>
-                <select className="form-select bg-muted" name="courseSelected" value={formData.courseSelected} onChange={handleChange}>
+                <label className="form-label">Course Selected <span className="text-destructive">*</span></label>
+                <select className={`form-select bg-muted ${validationErrors.courseSelected ? 'border-destructive focus:ring-destructive' : ''}`} name="courseSelected" value={formData.courseSelected} onChange={handleChange}>
                   <option value="">Select Course</option>
                   {courses.map(c => <option key={c.id} value={c.id}>{c.course_name}</option>)}
                 </select>
+                {validationErrors.courseSelected && <span className="text-sm text-destructive mt-1 block">{validationErrors.courseSelected}</span>}
               </div>
               <div className="form-group mb-0">
-                <label className="form-label">Phone Number</label>
-                <input type="text" className="form-input bg-muted" name="phone" value={formData.phone} onChange={handleChange} />
+                <label className="form-label">Phone Number <span className="text-destructive">*</span></label>
+                <input type="text" className={`form-input bg-muted ${validationErrors.phone ? 'border-destructive focus:ring-destructive' : ''}`} name="phone" value={formData.phone} onChange={handleChange} />
+                {validationErrors.phone && <span className="text-sm text-destructive mt-1 block">{validationErrors.phone}</span>}
               </div>
               <div className="form-group mb-0">
                 <label className="form-label">Email Address</label>
-                <input type="email" className="form-input bg-muted" name="email" value={formData.email} onChange={handleChange} />
+                <input type="email" className={`form-input bg-muted ${validationErrors.email ? 'border-destructive focus:ring-destructive' : ''}`} name="email" value={formData.email} onChange={handleChange} />
+                {validationErrors.email && <span className="text-sm text-destructive mt-1 block">{validationErrors.email}</span>}
               </div>
               <div className="form-group mb-0">
                 <label className="form-label">Father's Name</label>
@@ -309,31 +360,35 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
             <h3 className="text-xl font-semibold mb-6 text-foreground">Student Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="form-group mb-0">
-                <label className="form-label">Date of Birth <span style={{ color: 'var(--error, #ef4444)' }}>*</span></label>
-                <input type="date" className="form-input" name="dob" value={formData.dob} onChange={handleChange} />
+                <label className="form-label">Date of Birth <span className="text-destructive">*</span></label>
+                <input type="date" className={`form-input ${validationErrors.dob ? 'border-destructive focus:ring-destructive' : ''}`} name="dob" value={formData.dob} onChange={handleChange} />
+                {validationErrors.dob && <span className="text-sm text-destructive mt-1 block">{validationErrors.dob}</span>}
               </div>
               <div className="form-group mb-0">
-                <label className="form-label">Gender <span style={{ color: 'var(--error, #ef4444)' }}>*</span></label>
-                <select className="form-select" name="gender" value={formData.gender} onChange={handleChange}>
+                <label className="form-label">Gender <span className="text-destructive">*</span></label>
+                <select className={`form-select ${validationErrors.gender ? 'border-destructive focus:ring-destructive' : ''}`} name="gender" value={formData.gender} onChange={handleChange}>
                   <option value="">Select</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
                 </select>
+                {validationErrors.gender && <span className="text-sm text-destructive mt-1 block">{validationErrors.gender}</span>}
               </div>
               <div className="form-group mb-0">
-                <label className="form-label">Blood Group <span style={{ color: 'var(--error, #ef4444)' }}>*</span></label>
-                <select className="form-select" name="bloodGroup" value={formData.bloodGroup} onChange={handleChange}>
+                <label className="form-label">Blood Group <span className="text-destructive">*</span></label>
+                <select className={`form-select ${validationErrors.bloodGroup ? 'border-destructive focus:ring-destructive' : ''}`} name="bloodGroup" value={formData.bloodGroup} onChange={handleChange}>
                   <option value="">Select</option>
                   <option value="A+">A+</option><option value="A-">A-</option>
                   <option value="B+">B+</option><option value="B-">B-</option>
                   <option value="O+">O+</option><option value="O-">O-</option>
                   <option value="AB+">AB+</option><option value="AB-">AB-</option>
                 </select>
+                {validationErrors.bloodGroup && <span className="text-sm text-destructive mt-1 block">{validationErrors.bloodGroup}</span>}
               </div>
               <div className="form-group mb-0">
-                <label className="form-label">Emergency Contact <span style={{ color: 'var(--error, #ef4444)' }}>*</span></label>
-                <input type="text" className="form-input" name="emergencyContact" value={formData.emergencyContact} onChange={handleChange} />
+                <label className="form-label">Emergency Contact <span className="text-destructive">*</span></label>
+                <input type="text" className={`form-input ${validationErrors.emergencyContact ? 'border-destructive focus:ring-destructive' : ''}`} name="emergencyContact" value={formData.emergencyContact} onChange={handleChange} />
+                {validationErrors.emergencyContact && <span className="text-sm text-destructive mt-1 block">{validationErrors.emergencyContact}</span>}
               </div>
               <div className="form-group mb-0">
                 <label className="form-label">Qualification</label>
@@ -348,13 +403,14 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
                 <input type="date" className="form-input" name="joiningDate" value={formData.joiningDate} onChange={handleChange} />
               </div>
               <div className="form-group mb-0">
-                <label className="form-label">Batch Assigned <span style={{ color: 'var(--error, #ef4444)' }}>*</span></label>
-                <select className="form-select" name="batch" value={formData.batch} onChange={handleChange}>
+                <label className="form-label">Batch Assigned <span className="text-destructive">*</span></label>
+                <select className={`form-select ${validationErrors.batch ? 'border-destructive focus:ring-destructive' : ''}`} name="batch" value={formData.batch} onChange={handleChange}>
                   <option value="">Select Batch</option>
                   <option value="Morning">Morning (9 AM - 12 PM)</option>
                   <option value="Evening">Evening (4 PM - 7 PM)</option>
                   <option value="Weekend">Weekend</option>
                 </select>
+                {validationErrors.batch && <span className="text-sm text-destructive mt-1 block">{validationErrors.batch}</span>}
               </div>
               <div className="form-group mb-0">
                 <label className="form-label">Section</label>
@@ -540,7 +596,7 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
                       <input type="number" className="form-input text-lg font-semibold pl-8" value={formData.amountCollected} onChange={(e) => setFormData({ ...formData, amountCollected: e.target.value })} placeholder="0.00" />
                     </div>
                   </div>
-                  <div className="form-group mb-0">
+                  <div className="form-group mb-4">
                     <label className="form-label">Payment Mode</label>
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       {['Cash', 'UPI', 'Card', 'Bank Transfer'].map(mode => (
@@ -555,6 +611,56 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
                       ))}
                     </div>
                   </div>
+                  
+                  {/* Dynamic Payment UI */}
+                  {formData.paymentMethod === 'Card' && (
+                    <div className="mt-4 p-4 border border-border rounded-lg bg-muted/20 animate-fade-in">
+                      <p className="text-sm font-semibold mb-3 text-foreground">Card Details</p>
+                      <div className="space-y-3">
+                        <input type="text" placeholder="1234 1234 1234 1234" className="form-input w-full bg-surface" />
+                        <div className="grid grid-cols-2 gap-3">
+                          <input type="text" placeholder="MM/YY" className="form-input w-full bg-surface" />
+                          <input type="password" placeholder="CVV" className="form-input w-full bg-surface" />
+                        </div>
+                        <div className="pt-2">
+                          <p className="text-sm font-semibold mb-2 text-foreground">Card Holder Name</p>
+                          <input type="text" placeholder="Full Name on card" className="form-input w-full bg-surface" />
+                        </div>
+                        <div className="flex items-center gap-2 pt-2">
+                          <input type="checkbox" id="saveCard" className="w-4 h-4 accent-primary rounded border-border" />
+                          <label htmlFor="saveCard" className="text-xs text-muted-foreground cursor-pointer">
+                            Save this card for future as per RBI guidelines. <span className="text-primary hover:underline">Know More</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.paymentMethod === 'UPI' && (
+                    <div className="mt-4 p-4 border border-border rounded-lg bg-muted/20 animate-fade-in">
+                      <div className="flex items-center justify-between p-3 border border-border rounded-lg bg-surface mb-3 cursor-pointer hover:border-primary/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded bg-orange-100 flex items-center justify-center relative overflow-hidden">
+                            {/* Fake UPI icon */}
+                            <div className="absolute w-full h-full bg-orange-500 transform -skew-x-12 translate-x-1 translate-y-1"></div>
+                            <div className="absolute w-full h-full bg-green-500 transform skew-x-12 -translate-x-2"></div>
+                          </div>
+                          <span className="font-semibold text-foreground text-sm">Add new UPI ID</span>
+                        </div>
+                        <div className="w-5 h-5 rounded-full border-2 border-border flex items-center justify-center">
+                          {/* unselected circle */}
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">You will receive a request on the selected UPI app to complete your payment.</p>
+                    </div>
+                  )}
+
+                  {['Cash', 'Bank Transfer'].includes(formData.paymentMethod) && (
+                    <div className="mt-4 p-4 border border-border rounded-lg bg-muted/20 animate-fade-in text-center text-sm text-muted-foreground">
+                      <p>You have selected <strong>{formData.paymentMethod}</strong>.</p>
+                      <p className="mt-1">Please confirm the transaction to generate the receipt.</p>
+                    </div>
+                  )}
                 </div>
                 <button onClick={handleFinalSubmit} disabled={isSubmitting || submitLock.current} className="btn btn-primary w-full py-4 text-lg shadow-md flex items-center justify-center gap-2">
                   {isSubmitting ? <span className="spinner w-5 h-5 border-2"></span> : <><CheckCircle className="w-5 h-5" /> Confirm Admission</>}
@@ -592,7 +698,7 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
             </div>
 
             <div className="flex flex-wrap justify-center gap-4">
-              <button className="btn btn-secondary flex items-center gap-2"><Printer className="w-4 h-4" /> Print Receipt</button>
+              <button onClick={() => setShowReceipt(true)} disabled={!transaction} className="btn btn-secondary flex items-center gap-2"><Printer className="w-4 h-4" /> Print Receipt</button>
               <button onClick={() => setShowIdCard(true)} className="btn btn-secondary flex items-center gap-2"><ShieldCheck className="w-4 h-4" /> Print ID Card</button>
               <button onClick={onComplete} className="btn btn-primary flex items-center gap-2"><Home className="w-4 h-4" /> Return to Dashboard</button>
             </div>
@@ -619,6 +725,12 @@ const AdmissionWizard = ({ lead, courses, questions = [], onComplete, onCancel }
 
       {showIdCard && (
         <StudentIdCard student={{ ...formData, id: studentId }} onClose={() => setShowIdCard(false)} />
+      )}
+      
+      {showReceipt && transaction && (
+        <div className="fixed inset-0 z-[110] bg-background overflow-y-auto">
+          <ReceiptPage transaction={transaction} onBack={() => setShowReceipt(false)} />
+        </div>
       )}
     </div>
 

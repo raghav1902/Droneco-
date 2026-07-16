@@ -110,41 +110,51 @@ const ReceptionDashboard = () => {
         <StatCard loading={loading} title="Recent Payments" value={recentPayments.length} icon={ArrowUpRight} colorClass="text-secondary" />
       </div>
 
-      <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>Recent Payments (Today)</h3>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="glass-card overflow-hidden !p-0">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700/50">
+          <h3 className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>Recent Payments (Today)</h3>
+        </div>
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                <th style={{ padding: '0.75rem 1rem' }}>Receipt No.</th>
-                <th style={{ padding: '0.75rem 1rem' }}>Student</th>
-                <th style={{ padding: '0.75rem 1rem' }}>Amount</th>
-                <th style={{ padding: '0.75rem 1rem' }}>Time</th>
-                <th style={{ padding: '0.75rem 1rem' }}>Method</th>
+              <tr style={{ background: 'var(--bg-tertiary)' }}>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Receipt No.</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Student</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Amount</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Time</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Method</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
               {loading ? (
                  <tr>
-                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <td colSpan="5" className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>
                         <Loader className="animate-spin inline-block" size={24} />
                     </td>
                  </tr>
               ) : recentPayments.length > 0 ? recentPayments.map(txn => (
-                <tr key={txn.rcpt} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
-                  <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem' }}>{txn.rcpt}</td>
-                  <td style={{ padding: '0.75rem 1rem', fontWeight: 500 }}>{txn.student}</td>
-                  <td style={{ padding: '0.75rem 1rem', color: 'var(--success)' }}>+₹{txn.amount.toLocaleString()}</td>
-                  <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>{txn.time}</td>
-                  <td style={{ padding: '0.75rem 1rem' }}>
-                    <span style={{ fontSize: '0.8rem', padding: '0.2rem 0.5rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>
+                <tr key={txn.rcpt} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                  <td className="py-4 px-6 font-mono text-sm" style={{ color: 'var(--text-secondary)' }}>{txn.rcpt}</td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-sm"
+                           style={{ background: 'var(--success-glow)', color: 'var(--success)' }}>
+                        {(txn.student || 'S').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="font-bold text-sm" style={{ color: 'var(--text-main)' }}>{txn.student}</div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 font-bold" style={{ color: 'var(--success)' }}>+₹{txn.amount.toLocaleString()}</td>
+                  <td className="py-4 px-6 text-sm" style={{ color: 'var(--text-muted)' }}>{txn.time}</td>
+                  <td className="py-4 px-6">
+                    <span className="inline-flex px-2 py-1 rounded-md text-xs font-medium uppercase tracking-wider" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
                       {txn.method}
                     </span>
                   </td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No recent payments.</td>
+                  <td colSpan="5" className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>No recent payments today.</td>
                 </tr>
               )}
             </tbody>

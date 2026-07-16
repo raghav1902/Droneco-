@@ -137,35 +137,47 @@ const Reports = () => {
         </div>
       </div>
 
-      <div className="glass-card" style={{ padding: '1.5rem' }}>
-        <h3 style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>Student-wise Pending Fees (Top 5)</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-              <th style={{ padding: '0.75rem 1rem' }}>Student Name</th>
-              <th style={{ padding: '0.75rem 1rem' }}>Course</th>
-              <th style={{ padding: '0.75rem 1rem' }}>Total Fee</th>
-              <th style={{ padding: '0.75rem 1rem' }}>Paid</th>
-              <th style={{ padding: '0.75rem 1rem' }}>Pending</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reportsData.pendingFees.map((student, idx) => (
-              <tr key={idx} style={{ borderBottom: '1px solid var(--border)' }} className="table-row-hover">
-                <td style={{ padding: '0.75rem 1rem', fontWeight: 500 }}>{student.name}</td>
-                <td style={{ padding: '0.75rem 1rem' }}>{student.course}</td>
-                <td style={{ padding: '0.75rem 1rem' }}>₹{student.total}</td>
-                <td style={{ padding: '0.75rem 1rem', color: 'var(--success)' }}>₹{student.paid}</td>
-                <td style={{ padding: '0.75rem 1rem', color: 'var(--danger)', fontWeight: 600 }}>₹{student.pending}</td>
+      <div className="glass-card overflow-hidden !p-0">
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700/50">
+          <h3 className="text-lg font-bold" style={{ color: 'var(--text-main)' }}>Student-wise Pending Fees (Top 5)</h3>
+        </div>
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr style={{ background: 'var(--bg-tertiary)' }}>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Student Name</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Course</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Total Fee</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Paid</th>
+                <th className="py-4 px-6 font-bold text-xs uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Pending</th>
               </tr>
-            ))}
-            {reportsData.pendingFees.length === 0 && (
-              <tr>
-                <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No pending fees data available.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-700/50">
+              {reportsData.pendingFees.map((student, idx) => (
+                <tr key={idx} className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-sm"
+                           style={{ background: 'var(--warning-glow)', color: 'var(--warning)' }}>
+                        {(student.name || 'S').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="font-bold text-sm" style={{ color: 'var(--text-main)' }}>{student.name}</div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-sm" style={{ color: 'var(--text-secondary)' }}>{student.course}</td>
+                  <td className="py-4 px-6 text-sm font-medium" style={{ color: 'var(--text-main)' }}>₹{student.total?.toLocaleString()}</td>
+                  <td className="py-4 px-6 text-sm font-bold" style={{ color: 'var(--success)' }}>₹{student.paid?.toLocaleString()}</td>
+                  <td className="py-4 px-6 text-sm font-bold" style={{ color: 'var(--danger)' }}>₹{student.pending?.toLocaleString()}</td>
+                </tr>
+              ))}
+              {reportsData.pendingFees.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="py-12 text-center" style={{ color: 'var(--text-muted)' }}>No pending fees data available.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

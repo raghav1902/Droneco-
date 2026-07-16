@@ -36,54 +36,73 @@ const StudentIdCard = ({ student, onClose }) => {
 
   const handlePrint = () => {
     const printContent = printRef.current.innerHTML;
-    const originalContent = document.body.innerHTML;
 
-    document.body.innerHTML = `
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&display=swap');
-        @media print {
-          @page { size: auto; margin: 0; }
-          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: white; }
-          .id-card-wrapper { display: block; text-align: center; }
-          .id-card-canvas { display: inline-block; margin: 0 auto 40px auto; page-break-inside: avoid; page-break-after: always; }
-          .id-card-canvas:last-child { page-break-after: auto; }
-          .no-print { display: none !important; }
-        }
-        .id-card-canvas {
-            width: 320px;
-            height: 500px;
-            background-color: #ffffff;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #e5e9e6;
-        }
-        .watermark-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 140%;
-            opacity: 0.03;
-            pointer-events: none;
-            z-index: 0;
-            filter: grayscale(1);
-        }
-        .watermark-logo {
-            background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPEXaoWad8hP26_3puwLVah438EjNkrHW7mRJYyAEOBLqnQLeEh8HMGvtNLhs4R3StfgYqtm6a2GDe6nHpwk0A7qmC8gyVlQGMSaiEjWUGHjQ-w-I0JQvH1MY2JVabuiX9nYJmgVyPucN3GKVAB9fIRrYIhYaFy2mqQGL62Tigp75gBVCP5McFll34lyT9wmUR4AeJErJPhL4EIR9dQRuuCHpBMG7s_pA-VML2IuQp-Av0I9Qhr6nIYkwD3_-4-R7nUJ4');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            opacity: 0.04;
-            transform: scale(1.5) rotate(-15deg);
-        }
-      </style>
-      <div class="id-card-wrapper">${printContent}</div>
-    `;
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '-10000px';
+    iframe.style.bottom = '-10000px';
+    document.body.appendChild(iframe);
 
-    window.print();
-    document.body.innerHTML = originalContent;
-    window.location.reload(); // Reload to restore React state cleanly
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+      <html>
+      <head>
+        <title>Print ID Card</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Mrs+Saint+Delafield&display=swap');
+          @media print {
+            @page { size: auto; margin: 0; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 20px; font-family: 'Inter', sans-serif; background: white; }
+            .id-card-wrapper { display: block; text-align: center; }
+            .id-card-canvas { display: inline-block; margin: 0 auto 40px auto; page-break-inside: avoid; page-break-after: always; }
+            .id-card-canvas:last-child { page-break-after: auto; }
+            .no-print { display: none !important; }
+          }
+          .id-card-canvas {
+              width: 320px;
+              height: 500px;
+              background-color: #ffffff;
+              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+              position: relative;
+              overflow: hidden;
+              border: 1px solid #e5e9e6;
+          }
+          .watermark-overlay {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 140%;
+              opacity: 0.03;
+              pointer-events: none;
+              z-index: 0;
+              filter: grayscale(1);
+          }
+          .watermark-logo {
+              background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPEXaoWad8hP26_3puwLVah438EjNkrHW7mRJYyAEOBLqnQLeEh8HMGvtNLhs4R3StfgYqtm6a2GDe6nHpwk0A7qmC8gyVlQGMSaiEjWUGHjQ-w-I0JQvH1MY2JVabuiX9nYJmgVyPucN3GKVAB9fIRrYIhYaFy2mqQGL62Tigp75gBVCP5McFll34lyT9wmUR4AeJErJPhL4EIR9dQRuuCHpBMG7s_pA-VML2IuQp-Av0I9Qhr6nIYkwD3_-4-R7nUJ4');
+              background-size: contain;
+              background-repeat: no-repeat;
+              background-position: center;
+              opacity: 0.04;
+              transform: scale(1.5) rotate(-15deg);
+          }
+        </style>
+      </head>
+      <body>
+        <div class="id-card-wrapper">${printContent}</div>
+      </body>
+      </html>
+    `);
+    doc.close();
+
+    iframe.contentWindow.focus();
+    setTimeout(() => {
+      iframe.contentWindow.print();
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 100);
+    }, 250);
   };
 
   if (!student) return null;

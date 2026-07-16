@@ -6,6 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="QR-powered lead acquisition and student engagement platform for coaching institutes." />
     <title>Droneco - Institute Lead Acquisition Platform</title>
+    <script>
+      (function() {
+        try {
+          document.documentElement.classList.add('disable-transitions');
+          var savedTheme = localStorage.getItem('theme');
+          if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark-theme', 'dark');
+          }
+          window.addEventListener('load', function() {
+            setTimeout(function() {
+              document.documentElement.classList.remove('disable-transitions');
+            }, 50);
+          });
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

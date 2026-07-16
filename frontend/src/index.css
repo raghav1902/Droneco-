@@ -132,6 +132,14 @@
 @layer base {
   * {
     @apply border-border;
+    transition-property: color, background-color, border-color, fill, stroke, box-shadow;
+    transition-timing-function: ease-in-out;
+    transition-duration: 400ms;
+  }
+
+  .disable-transitions,
+  .disable-transitions * {
+    transition: none !important;
   }
 
   body {
@@ -514,4 +522,19 @@ select:focus {
 .form-grid-3,
 .form-grid-1-2 {
   gap: 1.25rem !important;
+}
+
+/* --- Custom Scrollbar for Sidebar --- */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
